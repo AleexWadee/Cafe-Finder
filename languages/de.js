@@ -139,6 +139,7 @@ export default {
     noContact: "Keine Telefonnummer oder Website angegeben",
     directions: "🧭 Route",
     findPhone: "Telefonnummer online suchen",
+    findWebsite: "Website online suchen",
     phoneWord: "Telefon",
     call: "Anrufen",
     save: "Speichern",

@@ -3,7 +3,7 @@
 import { MAX_RESULTS, QUICK_RESULTS_DELAY } from "../core/config.js";
 import { state, els, activeCat } from "../core/state.js";
 import { t } from "../core/i18n.js";
-import { distanceMeters } from "../core/utils.js";
+import { distanceMeters, storeGet, storeSet, STORE } from "../core/utils.js";
 import { categoryOf, positionOf, normalize } from "./places.js";
 import { scorePlace } from "./search.js";
 import { savedElements } from "./favorites.js";
@@ -143,6 +143,17 @@ export function refreshPlaces() {
   if (openId && state.places.some((p) => p.id === openId)) selectPlace(openId, { openPopup: popupWasOpen });
 }
 
+// Restores the country (for typical opening hours) and neighbourhood name from the last visit.
+export function restoreLastPlace(center) {
+  const last = storeGet(STORE.place);
+  if (!last?.center || distanceMeters(center, last.center) > 20000) return; // only if it's the same area
+  state.countryCode = last.countryCode || "";
+  state.region = last.region || "";
+  state.cityName = last.city || "";
+  state.placeLabel = last.label || "";
+  if (last.label) els.placeName.textContent = `📍 ${last.label}`;
+}
+
 // Shows the name of the neighbourhood under the title ("Arenales, Las Palmas").
 export async function updatePlaceName(center, force = false) {
   if (!force && state.namedCenter && distanceMeters(center, state.namedCenter) < 400) return;
@@ -157,8 +168,12 @@ export async function updatePlaceName(center, force = false) {
     const area = a.neighbourhood || a.suburb || a.quarter || a.city_district || a.road;
     const city = a.city || a.town || a.village;
     state.cityName = city || "";
-    els.placeName.textContent = `📍 ${[area, city].filter(Boolean).join(", ") || t("ui.aroundYou")}`;
+    const label = [area, city].filter(Boolean).join(", ");
+    state.placeLabel = label;
+    els.placeName.textContent = `📍 ${label || t("ui.aroundYou")}`;
+    // Remembered, so the next visit (even offline) knows the country and neighbourhood straight away.
+    storeSet(STORE.place, { center, label, city: state.cityName, countryCode: state.countryCode, region: state.region });
   } catch {
-    els.placeName.textContent = `📍 ${t("ui.aroundYou")}`;
+    els.placeName.textContent = `📍 ${state.placeLabel || t("ui.aroundYou")}`; // offline: keep the remembered name
   }
 }

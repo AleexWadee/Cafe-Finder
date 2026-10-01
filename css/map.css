@@ -116,7 +116,13 @@
   .iw .btn.primary, .iw .btn.primary:hover { color: #1a1714; }
 }
 
+/* Don't cover an open popup with the location label */
+.map-wrap:has(.leaflet-popup) .live-pill { display: none; }
+
 @media (max-width: 760px) {
   .locate { bottom: 30px; }
   .live-pill { bottom: 16px; }
+  /* On phones the full details open in the list below the map, so the popup is a short summary */
+  .iw .info, .iw .chips, .iw .week-wrap, .iw .actions .btn:not(.primary) { display: none; }
+  .leaflet-popup-content { min-width: 200px; }
 }

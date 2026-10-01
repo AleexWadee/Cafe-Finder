@@ -30,6 +30,7 @@ export const state = {
   countryCode: "",     // from reverse geocoding, used for public-holiday rules in opening hours
   region: "",
   cityName: "",        // used when searching a phone number online
+  placeLabel: "",      // neighbourhood name shown under the title
   pendingPlaceId: null, // a shared place to open once it's loaded
 
   // Data

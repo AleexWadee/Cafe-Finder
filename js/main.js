@@ -5,7 +5,7 @@ import { state, els } from "./core/state.js";
 import { LANGUAGES, getLang, setLang, t, translatePage } from "./core/i18n.js";
 import { distanceMeters, storeGet, STORE, savePrefs } from "./core/utils.js";
 import { loadHoursLibrary } from "./data/hours.js";
-import { findPlaces, refreshPlaces, updatePlaceName, computePlaces } from "./data/results.js";
+import { findPlaces, refreshPlaces, updatePlaceName, computePlaces, restoreLastPlace } from "./data/results.js";
 import { render, renderSkeleton, setStatus, setLoading } from "./ui/list.js";
 import { createMap, togglePlace, highlightPin, updateUserMarker, clearMarkers } from "./ui/map.js";
 import { buildTabs, translateTabs, wireTabs, syncCategoryUI } from "./ui/tabs.js";
@@ -180,6 +180,7 @@ async function init() {
   const shared = sharedPlaceFromLink();
 
   createMap(shared || last || CONFIG.DEFAULT_CENTER, shared ? 17 : last ? 16 : 15);
+  restoreLastPlace(shared || last || CONFIG.DEFAULT_CENTER);
   buildTabs();
   syncCategoryUI();
   wireTabs();
@@ -223,3 +224,17 @@ async function init() {
 }
 
 init();
+
+// Faster repeat visits and opening without internet (see sw.js). Browsers only allow this on HTTPS or localhost.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js")
+      .then(() => navigator.serviceWorker.ready)
+      .then((reg) => {
+        // Hand over the files this visit already loaded, so the app also works offline after the first visit.
+        const urls = performance.getEntriesByType("resource").map((e) => e.name).filter((u) => !u.includes("tile.openstreetmap.org"));
+        reg.active?.postMessage({ type: "save-files", urls: [location.href.split("#")[0], ...urls] });
+      })
+      .catch((err) => console.warn("Offline support unavailable:", err));
+  });
+}

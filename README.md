@@ -13,13 +13,14 @@ SpotHop is **100% free**. It uses [OpenStreetMap](https://www.openstreetmap.org)
 - 🌐 **6 languages**: English, Spanish, German, French, Italian and Portuguese, picked from the 🌐 menu at the top. SpotHop uses your device's language on the first visit and remembers your choice
 - 🔍 **Smart search** in all six languages. It understands the kind of place ("cerveza" → pubs), food ("pizza", "sushi", "tapas"), features ("terraza", "wifi", "para llevar"), "abierto" and names with typos ("starbuks"). It shows suggestions as you type, and can search a wider area (10 km) when nothing nearby matches
 - ℹ️ **Place details**: address, phone, website, email, WhatsApp, Instagram, Facebook, food, features and the weekly timetable, in the list and on the map. Click a place again to close it
-- 📞 **Phone numbers**: a 📞 button on the card calls the place directly. If OpenStreetMap has no number, one tap searches the web for it
+- 📞 **Phone numbers and websites**: a 📞 button on the card calls the place directly. If OpenStreetMap has no number or website, one tap searches the web for it
 - ❤️ **Saved places**: tap ♡ to keep a place on your device, then tap **Saved** to see them all, wherever they are
 - 🔗 **Share**: sends a link that opens SpotHop right on that place
 - 💾 **Remembers your settings**: category, distance, sort and language
 - 🕒 **Opening hours**: Open or Closed right now, plus the next change. Places that haven't published their hours get an estimate from typical hours, labelled "Likely open" or "Likely closed"
 - 🧭 **Directions inside the app**: walking, cycling or driving routes drawn on the map, with turn-by-turn steps that update as you move
 - 🚀 **Fast**: the map appears first, all categories load in one request, and your last location and results are remembered on your device
+- 📴 **Works offline**: after one visit, SpotHop opens without internet and shows your last places and map
 - 📱 **Add to home screen** on phones, light and dark mode, and a mobile layout
 
 ## Run it on your computer
@@ -38,6 +39,7 @@ Then open http://localhost:5173 and allow location access.
 SpotHop/
 ├── index.html                Page layout (stays here: GitHub Pages opens it from the top folder)
 ├── manifest.webmanifest      Lets phones add SpotHop to the home screen
+├── sw.js                     Offline support and faster repeat visits (stays here so it covers the whole site)
 ├── README.md                 This file
 ├── package.json              "npm start" runs a local server
 │

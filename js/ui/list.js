@@ -151,12 +151,19 @@ export function infoHtml(p) {
   if (p.whatsapp) row("💬", link(`https://wa.me/${p.whatsapp}`, "WhatsApp"), "info.contact");
   // No phone on OpenStreetMap: one tap searches the web for it.
   if (!p.phones.length) row("📞", link(phoneSearchUrl(p), t("info.findPhone")), "info.phone");
+  if (!p.website) row("🌐", link(webSearchUrl(p), t("info.findWebsite")), "info.website");
   return `<div class="info">${rows.join("")}</div>${chipsHtml(p.highlights)}`;
 }
 
 // A web search for the place's phone number ("Margariita Calle Joaquín Blume Las Palmas phone").
 function phoneSearchUrl(p) {
   const words = [p.name, p.tags["addr:street"], p.tags["addr:city"] || state.cityName, t("info.phoneWord")];
+  return `https://www.google.com/search?q=${encodeURIComponent(words.filter(Boolean).join(" "))}`;
+}
+
+// A web search for the place itself, to find its website.
+function webSearchUrl(p) {
+  const words = [p.name, p.tags["addr:city"] || state.cityName];
   return `https://www.google.com/search?q=${encodeURIComponent(words.filter(Boolean).join(" "))}`;
 }
 

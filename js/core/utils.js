@@ -79,7 +79,7 @@ export function loadScript(src) {
 }
 
 // Small things remembered on this device (last position and last download) so the next visit starts instantly.
-export const STORE = { pos: "spothop.lastPos", area: "spothop.lastArea", prefs: "spothop.prefs" };
+export const STORE = { pos: "spothop.lastPos", area: "spothop.lastArea", prefs: "spothop.prefs", place: "spothop.lastPlace" };
 
 export function storeGet(key) {
   try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }

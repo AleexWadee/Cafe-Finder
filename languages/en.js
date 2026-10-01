@@ -133,6 +133,7 @@ export default {
     noContact: "No phone or website listed",
     directions: "🧭 Directions",
     findPhone: "Find the phone number online",
+    findWebsite: "Find the website online",
     phoneWord: "phone",
     call: "Call",
     save: "Save",

@@ -145,6 +145,7 @@ export default {
     noContact: "No tiene teléfono ni web publicados",
     directions: "🧭 Cómo llegar",
     findPhone: "Buscar el teléfono en internet",
+    findWebsite: "Buscar la web en internet",
     phoneWord: "teléfono",
     call: "Llamar",
     save: "Guardar",

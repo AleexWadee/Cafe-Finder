@@ -14,6 +14,7 @@ export function createMap(center, zoom) {
     maxZoom: 19,
     updateWhenIdle: false, // load tiles while the map is still moving (Leaflet waits on phones by default)
     keepBuffer: 4,         // keep more tiles around the view, so panning back is instant
+    crossOrigin: true,     // lets the offline cache (sw.js) store tiles
   }).addTo(state.map);
   state.markersLayer = L.layerGroup().addTo(state.map);
 

@@ -138,6 +138,7 @@ export default {
     noContact: "Sem telefone nem site indicados",
     directions: "🧭 Como chegar",
     findPhone: "Procurar o telefone na internet",
+    findWebsite: "Procurar o site na internet",
     phoneWord: "telefone",
     call: "Ligar",
     save: "Guardar",

@@ -242,5 +242,7 @@
   .brand { padding: 14px 16px 12px; }
   .controls { padding: 0 16px 14px; gap: 12px; }
   .cats { gap: 6px; }
+  .cat { padding: 11px 0 9px; }
   .cat .label { font-size: 11px; }
+  .cat .label.long { font-size: 9.5px; letter-spacing: -0.03em; }
 }

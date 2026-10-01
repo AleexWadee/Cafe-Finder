@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0 — 2026-10-01
+
+- 📴 **Works offline**: after one visit, SpotHop opens without internet, showing the last places, the map you viewed and the remembered neighbourhood. Repeat visits load faster.
+- 🌐 **Website lookup**: places without a website get a "Find the website online" link, like the phone lookup.
+- 📱 **Phones**: the map popup is a short summary on small screens (the full details open in the list), so it no longer covers the whole map. "Restaurantes" fits its tile. The location label no longer covers an open popup.
+- The country (for typical opening hours) and neighbourhood name are remembered, so they're right from the first second.
+
 ## 1.2.0 — 2026-10-01
 
 ### More languages
