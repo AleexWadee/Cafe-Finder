@@ -393,6 +393,20 @@ button { font: inherit; color: inherit; }
 .badge.likely-open { color: var(--open); border: 1px dashed color-mix(in srgb, var(--open) 60%, transparent); padding: 2px 7px; }
 .badge.likely-closed { color: var(--muted); border: 1px dashed var(--border); padding: 2px 7px; }
 
+/* Contact details of an opened place */
+.info { display: flex; flex-direction: column; gap: 6px; margin: 10px 0 4px; }
+.info-row { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.4; }
+.info-icon { flex: none; width: 18px; text-align: center; }
+.info-value { min-width: 0; overflow-wrap: anywhere; color: var(--text); }
+.info-value a { color: var(--cat, var(--accent)); font-weight: 600; text-decoration: none; }
+.info-value a:active { opacity: .7; }
+@media (hover: hover) { .info-value a:hover { text-decoration: underline; } }
+.muted { color: var(--muted); }
+.details .chips { margin-top: 8px; }
+.card.selected .card-chips { display: none; } /* the full list is shown inside */
+.week-wrap { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+.iw .info { margin-top: 8px; }
+
 /* Weekly opening hours */
 .week { width: 100%; border-collapse: collapse; margin: 8px 0 2px; font-size: 12.5px; }
 .week th { text-align: left; font-weight: 500; color: var(--muted); padding: 3px 10px 3px 0; white-space: nowrap; width: 1%; }

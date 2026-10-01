@@ -211,7 +211,7 @@ function highlightsOf(tags) {
   if (yes("delivery")) out.push("🛵 Delivery");
   if (yes("reservation") || tags.reservation === "recommended") out.push("📅 Bookable");
   if (yes("wheelchair")) out.push("♿ Accessible");
-  return out.slice(0, 4);
+  return out;
 }
 
 function parseHours(raw, lat, lng) {
@@ -286,6 +286,17 @@ function weekHtml(p) {
   return `<table class="week">${rows.join("")}</table>${note}`;
 }
 
+// "+34 928 1; +34 600 2" → ["+34 928 1", "+34 600 2"]
+function splitList(value = "") {
+  return value.split(";").map((v) => v.trim()).filter(Boolean);
+}
+
+// Social links can be written as a full URL or just a username.
+function socialUrl(value, base) {
+  if (!value) return null;
+  return /^https?:\/\//i.test(value) ? safeUrl(value) : safeUrl(base + value.replace(/^@/, ""));
+}
+
 // Parsing opening hours is the slowest step, so each place is normalized once and reused.
 function normalize(el) {
   const id = `${el.type}/${el.id}`;
@@ -312,7 +323,11 @@ function normalize(el) {
     cuisine: prettify(tags.cuisine),
     address: addressOf(tags),
     website: safeUrl(tags.website || tags["contact:website"]),
-    phone: tags.phone || tags["contact:phone"] || "",
+    phones: splitList(tags.phone || tags["contact:phone"] || tags["contact:mobile"]),
+    email: tags.email || tags["contact:email"] || "",
+    instagram: socialUrl(tags["contact:instagram"] || tags.instagram, "https://www.instagram.com/"),
+    facebook: socialUrl(tags["contact:facebook"] || tags.facebook, "https://www.facebook.com/"),
+    fullCuisine: prettify(tags.cuisine, 8),
     isOpen,
     hoursText,
     estimated,
@@ -392,6 +407,7 @@ function downloadArea(center, radius) {
 
 // Only the tags SpotHop uses are saved, which keeps the saved copy small (a few hundred KB).
 const KEEP_TAGS = ["name", "amenity", "shop", "cuisine", "opening_hours", "addr:street", "addr:housenumber", "addr:city",
+  "email", "contact:email", "contact:mobile", "contact:instagram", "contact:facebook", "instagram", "facebook",
   "website", "contact:website", "phone", "contact:phone", "outdoor_seating", "internet_access", "takeaway", "delivery",
   "wheelchair", "diet:vegan", "diet:vegetarian", "diet:gluten_free", "cocktails", "drink:cocktail", "real_ale",
   "drink:real_ale", "brewery", "drink:wine", "bar", "live_music", "sport", "reservation", "dog", "brand"];
@@ -721,11 +737,31 @@ function badgeHtml(p) {
 }
 
 function linksHtml(p) {
-  return [
-    `<button type="button" class="btn primary" data-route="${escapeHtml(p.id)}">🧭 Directions</button>`,
-    p.website ? `<a class="btn" href="${escapeHtml(p.website)}" target="_blank" rel="noopener">🌐 Website</a>` : "",
-    p.phone ? `<a class="btn" href="tel:${escapeHtml(p.phone.replace(/[^\d+]/g, ""))}">📞 Call</a>` : "",
-  ].join("");
+  return `<button type="button" class="btn primary" data-route="${escapeHtml(p.id)}">🧭 Directions</button>`;
+}
+
+// Address, phone, website, email, socials, food and features of an opened place.
+function infoHtml(p) {
+  const rows = [];
+  const row = (icon, html, label) => rows.push(
+    `<div class="info-row"><span class="info-icon" title="${label}" aria-label="${label}">${icon}</span><span class="info-value">${html}</span></div>`);
+  const link = (href, text, external = true) =>
+    `<a href="${escapeHtml(href)}"${external ? ' target="_blank" rel="noopener"' : ""}>${escapeHtml(text)}</a>`;
+
+  if (p.address) row("🏠", escapeHtml(p.address), "Address");
+  for (const phone of p.phones) row("📞", link(`tel:${phone.replace(/[^\d+]/g, "")}`, phone, false), "Phone");
+  if (p.website) row("🌐", link(p.website, new URL(p.website).hostname.replace(/^www\./, "")), "Website");
+  if (p.email) row("✉️", link(`mailto:${p.email}`, p.email, false), "Email");
+  if (p.instagram) row("📷", link(p.instagram, "Instagram"), "Instagram");
+  if (p.facebook) row("👍", link(p.facebook, "Facebook"), "Facebook");
+  if (p.fullCuisine) row("🍽️", escapeHtml(p.fullCuisine), "Food");
+  if (!p.phones.length && !p.website && !p.email && !p.instagram && !p.facebook) {
+    row("ℹ️", '<span class="muted">No phone or website listed</span>', "Contact");
+  }
+  const features = p.highlights.length
+    ? `<div class="chips">${p.highlights.map((h) => `<span>${escapeHtml(h)}</span>`).join("")}</div>`
+    : "";
+  return `<div class="info">${rows.join("")}</div>${features}`;
 }
 
 function renderList(list) {
@@ -773,15 +809,15 @@ function renderList(list) {
           </div>
           ${subtitle ? `<div class="subtitle">${escapeHtml(subtitle)}</div>` : ""}
           <div class="meta">${meta}</div>
-          ${p.highlights.length ? `<div class="chips">${p.highlights.map((h) => `<span>${escapeHtml(h)}</span>`).join("")}</div>` : ""}
-          <div class="details">
-            ${p.address ? `<p>🏠 ${escapeHtml(p.address)}</p>` : ""}
-            <div class="week-wrap" data-week>${p.id === state.selectedId ? weekHtml(p) : ""}</div>
-            <div class="actions">${linksHtml(p)}</div>
-          </div>
+          ${p.highlights.length ? `<div class="chips card-chips">${p.highlights.slice(0, 4).map((h) => `<span>${escapeHtml(h)}</span>`).join("")}</div>` : ""}
+          <div class="details" data-details>${p.id === state.selectedId ? detailsHtml(p) : ""}</div>
         </div>
       </li>`;
   }).join("");
+}
+
+function detailsHtml(p) {
+  return `${infoHtml(p)}<div class="week-wrap">${weekHtml(p)}</div><div class="actions">${linksHtml(p)}</div>`;
 }
 
 function pinIcon(p) {
@@ -805,8 +841,10 @@ function renderMarkers(list) {
   for (const p of list) {
     if (state.markers.has(p.id)) continue;
     const marker = L.marker([p.lat, p.lng], { icon: pinIcon(p), title: p.name, riseOnHover: true })
-      .bindPopup(() => popupHtml(p), { maxWidth: 270 })
-      .on("click", () => selectPlace(p.id, { scrollList: true, openPopup: false }));
+      .bindPopup(() => popupHtml(p), { maxWidth: 290, minWidth: 250, maxHeight: 380, autoPanPadding: [24, 24] })
+      // Leaflet opens the popup on the first click and closes it on the second; the card follows.
+      .on("popupopen", () => selectPlace(p.id, { scrollList: true, openPopup: false }))
+      .on("popupclose", () => { if (state.selectedId === p.id) deselectPlace({ closePopup: false }); });
     state.markersLayer.addLayer(marker);
     state.markers.set(p.id, marker);
   }
@@ -820,8 +858,8 @@ function popupHtml(p) {
       ${subtitle ? `<p>${escapeHtml(subtitle)}</p>` : ""}
       <p>${[formatDistance(p.distance), walkTime(p.distance)].map(escapeHtml).join(" · ")}</p>
       ${p.hoursText ? `<p>🕒 ${escapeHtml(p.hoursText)}${p.estimated ? " (estimate)" : ""}</p>` : ""}
-      ${p.address ? `<p>🏠 ${escapeHtml(p.address)}</p>` : ""}
-      ${p.highlights.length ? `<div class="chips">${p.highlights.map((h) => `<span>${escapeHtml(h)}</span>`).join("")}</div>` : ""}
+      ${infoHtml(p)}
+      <div class="week-wrap">${weekHtml(p)}</div>
       <div class="actions">${linksHtml(p)}</div>
     </div>`;
 }
@@ -841,8 +879,8 @@ function selectPlace(id, { scrollList = false, pan = false, openPopup = true } =
   const card = els.results.querySelector(`[data-id="${CSS.escape(id)}"]`);
   if (card) {
     card.classList.add("selected");
-    const week = card.querySelector("[data-week]");
-    if (week && !week.innerHTML) week.innerHTML = weekHtml(p); // built only when opened
+    const details = card.querySelector("[data-details]");
+    if (details && !details.innerHTML) details.innerHTML = detailsHtml(p); // built only when opened
     if (scrollList) card.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
@@ -850,7 +888,25 @@ function selectPlace(id, { scrollList = false, pan = false, openPopup = true } =
     state.followUser = false;
     state.map.panTo([p.lat, p.lng]);
   }
-  if (openPopup) state.markers.get(id)?.openPopup();
+  if (openPopup && !state.markers.get(id)?.isPopupOpen()) state.markers.get(id)?.openPopup();
+}
+
+// Closes the opened place in the list and on the map.
+function deselectPlace({ closePopup = true } = {}) {
+  const id = state.selectedId;
+  if (!id) return;
+  state.selectedId = null;
+  highlightPin(id, false);
+  els.results.querySelectorAll(".card.selected").forEach((el) => el.classList.remove("selected"));
+  const marker = state.markers.get(id);
+  // (When the popup itself is closing, closing it again would confuse Leaflet.)
+  if (closePopup && marker?.isPopupOpen()) marker.closePopup();
+}
+
+// Clicking a place opens it; clicking it again closes it.
+function togglePlace(id) {
+  if (state.selectedId === id) deselectPlace();
+  else selectPlace(id, { pan: true });
 }
 
 function drawRadius() {
@@ -1321,13 +1377,13 @@ function wireControls() {
   els.results.addEventListener("click", (e) => {
     if (e.target.closest("a, button")) return; // let links and buttons work normally
     const card = e.target.closest(".card[data-id]");
-    if (card) selectPlace(card.dataset.id, { pan: true });
+    if (card) togglePlace(card.dataset.id);
   });
   els.results.addEventListener("keydown", (e) => {
     const card = e.target.closest(".card[data-id]");
     if (card && (e.key === "Enter" || e.key === " ")) {
       e.preventDefault();
-      selectPlace(card.dataset.id, { pan: true });
+      togglePlace(card.dataset.id);
     }
   });
   els.results.addEventListener("mouseover", (e) => {
