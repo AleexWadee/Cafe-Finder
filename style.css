@@ -62,6 +62,7 @@ html, body {
   color: var(--text);
   font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent; /* no grey box when tapping on phones */
 }
 
 button { font: inherit; color: inherit; }
@@ -159,7 +160,6 @@ button { font: inherit; color: inherit; }
   cursor: pointer;
   transition: transform .12s, border-color .15s, background .15s;
 }
-.cat:hover { background: var(--surface); }
 .cat:active { transform: scale(.96); }
 .cat .emoji { font-size: 24px; line-height: 1.1; }
 .cat .label { font-size: 12px; font-weight: 600; letter-spacing: -0.01em; }
@@ -207,7 +207,6 @@ button { font: inherit; color: inherit; }
   white-space: nowrap;
   transition: background .15s, color .15s;
 }
-.segmented button:hover { color: var(--text); }
 .segmented button[aria-checked="true"] {
   background: var(--panel);
   color: var(--text);
@@ -291,7 +290,6 @@ button { font: inherit; color: inherit; }
   border: 1.5px solid transparent;
   transition: background .15s, border-color .15s;
 }
-.card:hover { background: var(--surface); }
 .card:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .card.selected {
   background: color-mix(in srgb, var(--cat) 9%, var(--panel));
@@ -385,7 +383,6 @@ button { font: inherit; color: inherit; }
   padding: 6px 12px;
   transition: border-color .15s;
 }
-.btn:hover { border-color: var(--cat, var(--accent)); }
 .btn.primary { background: var(--cat, var(--accent)); border-color: transparent; color: #fff; }
 @media (prefers-color-scheme: dark) {
   .btn.primary { color: #1a1714; }
@@ -412,10 +409,38 @@ button { font: inherit; color: inherit; }
 .leaflet-container { font-family: inherit; background: var(--bg); }
 @media (prefers-color-scheme: dark) {
   .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.5); }
-  .leaflet-bar a { background: var(--panel); color: var(--text); border-color: var(--border); }
   .leaflet-control-attribution { background: rgba(26, 23, 20, .8) !important; color: var(--muted); }
   .leaflet-control-attribution a { color: var(--muted); }
 }
+
+/* Zoom buttons. Leaflet's own style turns them white on hover and focus, and on phones
+   that sticks after a tap. Here they only flash while pressed, then go back. */
+.leaflet-bar a,
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
+  background: var(--panel);
+  color: var(--text);
+  border-color: var(--border);
+  transition: background .25s, color .25s;
+}
+.leaflet-bar a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.leaflet-bar a:active,
+.leaflet-bar a.pressed { background: #ffffff; color: #1a1714; transition: none; }
+
+/* Hover effects only on devices with a mouse, so they don't get stuck after a tap on phones. */
+@media (hover: hover) {
+  .cat:hover { background: var(--surface); }
+  .segmented button:hover { color: var(--text); }
+  .card:hover { background: var(--surface); }
+  .btn:hover { border-color: var(--cat, var(--accent)); }
+  .search-area:hover { background: var(--surface); }
+  .back:hover { background: var(--surface-2); }
+  .leaflet-bar a:hover { background: var(--surface); }
+}
+
+/* Tap feedback on touch screens: a quick flash while the finger is down. */
+.map-btn:active, .back:active, .btn:active, .segmented button:active { filter: brightness(1.25); }
+.card:active { background: var(--surface); }
 
 .map-btn {
   position: absolute;
@@ -434,7 +459,6 @@ button { font: inherit; color: inherit; }
   padding: 11px 20px;
   font-size: 14px;
 }
-.search-area:hover { background: var(--surface); }
 .locate {
   right: 10px; bottom: 40px;
   width: 44px; height: 44px;
@@ -533,7 +557,6 @@ button { font: inherit; color: inherit; }
   font-weight: 600;
   cursor: pointer;
 }
-.back:hover { background: var(--surface-2); }
 
 .route-dest { display: flex; align-items: center; gap: 14px; }
 .route-dest-text { min-width: 0; }

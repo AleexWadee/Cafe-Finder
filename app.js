@@ -1151,6 +1151,13 @@ async function init() {
   const fallback = CONFIG.DEFAULT_CENTER || { lat: 40.4168, lng: -3.7038 };
   state.map = L.map("map", { zoomControl: false }).setView(fallback, 15);
   L.control.zoom({ position: "topright" }).addTo(state.map);
+  // Zoom buttons flash white when tapped, then fade back to normal.
+  state.map.getContainer().querySelectorAll(".leaflet-control-zoom a").forEach((a) => {
+    a.addEventListener("pointerdown", () => {
+      a.classList.add("pressed");
+      setTimeout(() => a.classList.remove("pressed"), 180);
+    });
+  });
   addBaseLayer();
   state.markersLayer = L.layerGroup().addTo(state.map);
 
@@ -1168,5 +1175,8 @@ async function init() {
   await search(center);
   startWatchingPosition();
 }
+
+// iPhone Safari only shows :active (pressed) styles when the page listens for touches.
+document.addEventListener("touchstart", () => {}, { passive: true });
 
 init();
