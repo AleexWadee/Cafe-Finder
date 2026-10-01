@@ -14,7 +14,8 @@ SpotHop is **100% free**. It uses [OpenStreetMap](https://www.openstreetmap.org)
 - 🕒 **Opening hours**: Open / Closed right now, the next opening or closing time, and a full weekly schedule. Places that haven't published their hours get an estimate from typical hours for that kind of place, clearly labelled "Likely open" / "Likely closed"
 - 🧭 **Directions inside the app**: walking, cycling or driving routes drawn on the map, with turn-by-turn steps, travel time and arrival time. The route updates as you move
 - Highlights for each place type, such as cocktails, real ale, live music, vegan, terrace and Wi-Fi, plus walking time, address, website and phone
-- 🔍 Search by name or cuisine
+- 🔍 **Smart search** in English or Spanish. It understands the kind of place ("cerveza" → pubs), food ("pizza", "sushi", "tapas"), features ("terraza", "wifi", "para llevar"), "abierto" and names with typos ("starbuks"). It shows suggestions as you type, and can search a wider area (10 km) when nothing nearby matches
+- 🚀 **Fast start**: the map appears first, the big opening-hours library loads afterwards, and the last location and results are remembered on the device so the next visit is instant
 - 🔄 **Search this area**: drag the map anywhere and search there
 - 🎚️ Filter by distance (500 m to 5 km), sort by nearest or A–Z, and show only places that are open now
 - 🌗 Light and dark mode, plus a mobile layout
@@ -47,4 +48,5 @@ The public Overpass servers are free and shared, so they're sometimes busy. Spot
 | `index.html` | Page layout |
 | `style.css` | Styles, dark mode and the responsive layout |
 | `app.js` | Map, live location, place search, list and markers |
+| `search.js` | Smart search: understands words in English and Spanish, typo tolerance and ranking |
 | `config.js` | Default map center and the Overpass servers |

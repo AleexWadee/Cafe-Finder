@@ -6,8 +6,15 @@
   <title>SpotHop — Cafes, Pubs, Bars & Restaurants Near You</title>
   <meta name="description" content="Find coffee places, pubs, bars and restaurants near you on a live map." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>" />
+  <!-- Open connections early so the map, data and fonts arrive sooner -->
+  <link rel="preconnect" href="https://tile.openstreetmap.org" />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+  <link rel="preconnect" href="https://overpass-api.de" crossorigin />
+  <link rel="preconnect" href="https://nominatim.openstreetmap.org" crossorigin />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Font loads without blocking the page (system font is used until it arrives) -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" onload="this.rel='stylesheet'" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -23,10 +30,17 @@
       </header>
 
       <div class="controls">
-        <label class="search">
-          <span class="search-icon" aria-hidden="true">🔍</span>
-          <input id="query" type="search" placeholder="Search by name or cuisine…" autocomplete="off" />
-        </label>
+        <div class="search-wrap">
+          <label class="search">
+            <span class="search-icon" aria-hidden="true">🔍</span>
+            <input id="query" type="text" inputmode="search" enterkeyhint="search"
+              placeholder="Try “pizza con terraza”, “cerveza” or a name…" autocomplete="off"
+              role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list" />
+            <button type="button" class="clear-query hidden" id="clearQuery" aria-label="Clear search">✕</button>
+          </label>
+          <ul class="suggest hidden" id="suggest" role="listbox"></ul>
+        </div>
+        <div class="chips understood hidden" id="understood" aria-live="polite"></div>
 
         <div class="cats" id="tabs" role="tablist" aria-label="Categories"></div>
 
@@ -75,9 +89,7 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-  <!-- SunCalc is required by opening_hours (for sunrise/sunset rules) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/opening_hours@3.15.0/build/opening_hours.min.js"></script>
+  <!-- The opening-hours library (~700 KB) is loaded by app.js after the map is on screen -->
   <script src="config.js"></script>
   <script src="app.js" type="module"></script>
 </body>

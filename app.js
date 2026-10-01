@@ -1,6 +1,8 @@
 // SpotHop — find cafes, pubs, bars and restaurants near you on a live map.
 // Free data: OpenStreetMap (via the Overpass API, with Nominatim as backup) — no API key required.
 
+import { parseQuery, indexPlace, scorePlace, chipsFor, fold } from "./search.js";
+
 const CONFIG = window.SPOTHOP_CONFIG || {};
 const OVERPASS_SERVERS = CONFIG.OVERPASS_SERVERS || ["https://overpass-api.de/api/interpreter"];
 
@@ -40,7 +42,7 @@ const ROUTE_REFRESH_DISTANCE = 30; // re-route after moving this far (meters) wh
 const MAX_RESULTS = 150;
 const CACHE_TTL = 10 * 60 * 1000;
 const OVERPASS_TIMEOUT = 12000;   // per server
-const QUICK_RESULTS_DELAY = 2000; // show backup results if the main server is slower than this
+const QUICK_RESULTS_DELAY = 1200; // show backup results if the main server is slower than this
 const PREFETCH_RADIUS = 1000;     // always load at least this much, so smaller radiuses are instant
 const PREFETCH_MARGIN = 400;      // extra margin so walking around doesn't need a new download
 const AUTO_REFRESH_DISTANCE = 300;
@@ -52,6 +54,10 @@ const state = {
   sort: "distance",
   openNow: false,
   query: "",
+  parsed: null,        // what the search box understood (see search.js), or null when empty
+  searchScope: null,   // a tab tapped while searching
+  remote: null,        // { query, elements } from "search a wider area"
+  staleArea: null,     // last download saved on this device, shown instantly on the next visit
   map: null,
   markersLayer: null,
   radiusCircle: null,
@@ -63,6 +69,7 @@ const state = {
   countryCode: "",     // from reverse geocoding, used for public-holiday rules in opening hours
   region: "",
   elements: [],        // raw OSM elements for the current search (all categories)
+  elementsCat: "all",  // which category `elements` covers ("all" for Overpass, one category for the backup)
   source: "none",      // "overpass" (complete), "quick" (temporary), "backup" (Nominatim only)
   loading: false,
   places: [],          // normalized places for the current category + radius
@@ -85,6 +92,9 @@ const els = {
   logo: $("#logo"),
   placeName: $("#placeName"),
   query: $("#query"),
+  clearQuery: $("#clearQuery"),
+  suggest: $("#suggest"),
+  understood: $("#understood"),
   tabs: $("#tabs"),
   radius: $("#radius"),
   sort: $("#sort"),
@@ -131,10 +141,6 @@ function prettify(value = "", max = 3) {
     .map((v) => v[0].toUpperCase() + v.slice(1)).join(", ");
 }
 
-function fold(str = "") {
-  return str.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-}
-
 function safeUrl(url) {
   if (!url) return null;
   const withScheme = /^https?:\/\//i.test(url) ? url : `https://${url}`;
@@ -142,6 +148,21 @@ function safeUrl(url) {
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Small things remembered on this device (last position and last download) so the next visit starts instantly.
+const STORE = { pos: "spothop.lastPos", area: "spothop.lastArea" };
+function storeGet(key) {
+  try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
+}
+function storeSet(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* storage full or blocked */ }
+}
+
+// While searching, the category comes from the words typed ("cerveza" → pubs) or a tab tapped during the search.
+function activeCat() {
+  if (!state.parsed) return state.category;
+  return state.searchScope || state.parsed.cat || "all";
+}
 const catColor = (cat) => getComputedStyle(document.documentElement).getPropertyValue(`--c-${cat}`).trim();
 const plural = (n, cat) => `${n} ${n === 1 ? CATEGORIES[cat].one : CATEGORIES[cat].many}`;
 
@@ -220,8 +241,9 @@ function openingInfo(tags, cat, lat, lng) {
   const next = oh.getNextChange(now);
   let text = "";
   if (next) {
-    const sameDay = next.toDateString() === now.toDateString();
-    const when = sameDay ? formatTime(next) : `${next.toLocaleDateString("en-GB", { weekday: "short" })} ${formatTime(next)}`;
+    // Late-night times (e.g. closing at 00:00 or 02:00) show just the time, not tomorrow's day name.
+    const sameDay = next.toDateString() === now.toDateString() || (next - now < 12 * 3600e3 && next.getHours() < 6);
+    const when = sameDay ? formatTime(next) :`${next.toLocaleDateString("en-GB", { weekday: "short" })} ${formatTime(next)}`;
     text = `${estimated ? "Usually " : ""}${isOpen ? "closes" : "opens"} ${when}`;
     text = text[0].toUpperCase() + text.slice(1);
   } else if (isOpen) {
@@ -298,7 +320,7 @@ function normalize(el) {
     highlights: highlightsOf(tags),
     distance: 0,
   };
-  place.searchText = fold(`${place.name} ${place.kind} ${place.cuisine}`);
+  indexPlace(place);
   state.normCache.set(id, { time: Date.now(), place });
   return place;
 }
@@ -353,8 +375,10 @@ function downloadArea(center, radius) {
   const entry = { center, radius: fetchRadius };
   entry.promise = fetchOverpass(buildQuery(center, fetchRadius))
     .then((elements) => {
-      state.areas.unshift({ center, radius: fetchRadius, time: Date.now(), elements });
+      const area = { center, radius: fetchRadius, time: Date.now(), elements };
+      state.areas.unshift(area);
       state.areas.length = Math.min(state.areas.length, 8);
+      saveArea(area);
       return elements;
     })
     .catch((err) => {
@@ -364,6 +388,24 @@ function downloadArea(center, radius) {
     .finally(() => { state.inFlight = state.inFlight.filter((f) => f !== entry); });
   state.inFlight.push(entry);
   return entry.promise;
+}
+
+// Only the tags SpotHop uses are saved, which keeps the saved copy small (a few hundred KB).
+const KEEP_TAGS = ["name", "amenity", "shop", "cuisine", "opening_hours", "addr:street", "addr:housenumber", "addr:city",
+  "website", "contact:website", "phone", "contact:phone", "outdoor_seating", "internet_access", "takeaway", "delivery",
+  "wheelchair", "diet:vegan", "diet:vegetarian", "diet:gluten_free", "cocktails", "drink:cocktail", "real_ale",
+  "drink:real_ale", "brewery", "drink:wine", "bar", "live_music", "sport", "reservation", "dog", "brand"];
+
+function saveArea(area) {
+  const elements = [];
+  for (const el of area.elements) {
+    const pos = positionOf(el);
+    if (!pos) continue;
+    const tags = {};
+    for (const k of KEEP_TAGS) if (el.tags?.[k]) tags[k] = el.tags[k];
+    elements.push({ type: el.type, id: el.id, lat: pos.lat, lon: pos.lng, tags });
+  }
+  storeSet(STORE.area, { center: area.center, radius: area.radius, time: area.time, elements });
 }
 
 // Nominatim's usage policy allows max 1 request per second, so all its requests wait in one queue.
@@ -380,6 +422,17 @@ function nominatimFetch(path, params) {
   });
   nominatimQueue = run.catch(() => {});
   return run;
+}
+
+function nominatimToElement(r) {
+  const a = r.address || {};
+  return {
+    type: r.osm_type, id: r.osm_id, lat: Number(r.lat), lon: Number(r.lon),
+    tags: {
+      ...(r.extratags || {}), name: r.name, [r.category]: r.type,
+      "addr:street": a.road, "addr:housenumber": a.house_number, "addr:city": a.city || a.town || a.village,
+    },
+  };
 }
 
 // Backup source: Nominatim (OpenStreetMap's search engine). Max 40 results per type, but fast.
@@ -402,27 +455,19 @@ function fetchNominatim(center, radius, category) {
   const viewbox = [center.lng - dLng, center.lat + dLat, center.lng + dLng, center.lat - dLat].join(",");
   const promise = nominatimFetch("search", {
     q: `[${CATEGORIES[category].nominatim[0]}]`, format: "jsonv2", viewbox, bounded: "1", limit: "40", extratags: "1", addressdetails: "1",
-  }).then((results) => results.map((r) => {
-    const a = r.address || {};
-    return {
-      type: r.osm_type, id: r.osm_id, lat: Number(r.lat), lon: Number(r.lon),
-      tags: {
-        ...(r.extratags || {}), name: r.name, [r.category]: r.type,
-        "addr:street": a.road, "addr:housenumber": a.house_number, "addr:city": a.city || a.town || a.village,
-      },
-    };
-  }));
+  }).then((results) => results.map(nominatimToElement));
 
   state.quickCache.set(key, { time: Date.now(), promise });
   promise.catch(() => state.quickCache.delete(key));
   return promise;
 }
 
-// In backup mode, quietly load the other categories so switching tabs is instant.
+// In backup mode, quietly load the other categories so switching tabs is instant,
+// then save them all on this device for the next visit.
 function prefetchBackup(center, radius) {
-  for (const cat of ["bars", "restaurants", "pubs", "coffee"]) {
-    if (cat !== state.category) fetchNominatim(center, radius, cat).catch(() => {});
-  }
+  fetchNominatim(center, radius, "all")
+    .then((elements) => saveArea({ center, radius, time: Date.now(), elements }))
+    .catch(() => {});
 }
 
 // Shows the name of the neighbourhood under the search ("Arenales, Las Palmas").
@@ -434,8 +479,7 @@ async function updatePlaceName(center) {
     if (a.country_code && a.country_code !== state.countryCode) {
       state.countryCode = a.country_code;
       state.region = a.state || "";
-      state.normCache.clear(); // re-check opening hours with the right public holidays
-      if (!state.loading) { computePlaces(); render(); }
+      refreshPlaces(); // re-check opening hours with the right public holidays
     }
     const area = a.neighbourhood || a.suburb || a.quarter || a.city_district || a.road;
     const city = a.city || a.town || a.village;
@@ -454,43 +498,54 @@ async function search(center = state.map.getCenter()) {
   state.selectedId = null;
   els.searchAreaBtn.classList.add("hidden");
   drawRadius();
-  updatePlaceName(center);
+  setTimeout(() => updatePlaceName(center), 2500);
 
   // Instant: we already downloaded this area.
   const cached = findCachedArea(center, state.radius);
   if (cached) return useElements(cached.elements, "overpass");
 
-  // Clear old results immediately so another category's places are never shown.
-  state.elements = [];
-  state.places = [];
-  setLoading(true);
-  renderSkeleton();
-  renderCounts();
-  setStatus(`Looking for ${CATEGORIES[state.category].many}…`);
+  // Instant on the next visit: show the copy saved on this device while a fresh one downloads.
+  const stale = state.staleArea && covers(state.staleArea, center, state.radius) ? state.staleArea : null;
+  if (stale) {
+    useElements(stale.elements, "overpass");
+    setLoading(true);
+  } else {
+    // Clear old results immediately so another category's places are never shown.
+    state.elements = [];
+    state.places = [];
+    setLoading(true);
+    renderSkeleton();
+    renderCounts();
+    setStatus(`Looking for ${CATEGORIES[activeCat()].many}…`);
+  }
 
   if (Date.now() > state.overpassDownUntil) {
     const download = downloadArea(center, state.radius);
-    const quickTimer = setTimeout(() => showBackupResults(token, center, true), QUICK_RESULTS_DELAY);
+    const quickTimer = stale ? null : setTimeout(() => showBackupResults(token, center, true), QUICK_RESULTS_DELAY);
     try {
       const elements = await download;
       clearTimeout(quickTimer);
-      if (token === state.searchToken) useElements(elements, "overpass");
+      if (token === state.searchToken) {
+        state.staleArea = null;
+        useElements(elements, "overpass");
+      }
       return;
     } catch {
       clearTimeout(quickTimer);
       if (token !== state.searchToken) return;
     }
   }
+  if (stale) { setLoading(false); return; } // keep the saved copy rather than the smaller backup
   await showBackupResults(token, center, false);
 }
 
 async function showBackupResults(token, center, temporary) {
-  const category = state.category;
+  const category = activeCat();
   try {
     const elements = await fetchNominatim(center, state.radius, category);
-    if (token !== state.searchToken || category !== state.category) return;
+    if (token !== state.searchToken || category !== activeCat()) return;
     if (temporary && state.source === "overpass") return; // the full results already arrived
-    useElements(elements, temporary ? "quick" : "backup");
+    useElements(elements, temporary ? "quick" : "backup", category);
     if (!temporary) prefetchBackup(center, state.radius);
   } catch (err) {
     if (token !== state.searchToken || temporary) return;
@@ -502,8 +557,9 @@ async function showBackupResults(token, center, temporary) {
   }
 }
 
-function useElements(elements, source) {
+function useElements(elements, source, cat = "all") {
   state.elements = elements;
+  state.elementsCat = source === "overpass" ? "all" : cat;
   state.source = source;
   setLoading(source === "quick");
   computePlaces();
@@ -515,25 +571,53 @@ function setLoading(on) {
   els.spinner.classList.toggle("hidden", !on);
 }
 
-// Filters the downloaded data down to the current category and radius (fast, no network).
+// Filters the downloaded data down to the category, radius and search (fast, no network).
 function computePlaces() {
   if (!state.searchCenter) return;
   const origin = state.userPos || state.searchCenter;
+  const scope = activeCat();
+  const parsed = state.parsed;
+  const remote = state.remote?.query === state.query ? state.remote.elements : [];
   const seen = new Set();
   const list = [];
-  for (const el of state.elements) {
+  for (const [el, nearby] of [...state.elements.map((e) => [e, true]), ...remote.map((e) => [e, false])]) {
     const cat = categoryOf(el.tags || {});
-    if (!cat || (state.category !== "all" && cat !== state.category)) continue;
+    if (!cat || (scope !== "all" && cat !== scope)) continue;
     const pos = positionOf(el);
-    if (!pos || distanceMeters(state.searchCenter, pos) > state.radius) continue;
+    if (!pos || (nearby && distanceMeters(state.searchCenter, pos) > state.radius)) continue;
     const place = normalize(el);
     if (!place || seen.has(place.id)) continue;
+    place.score = parsed ? scorePlace(place, parsed, place.isOpen) : 1;
+    if (!place.score) continue;
     seen.add(place.id);
     place.distance = distanceMeters(origin, place);
     list.push(place);
   }
-  list.sort((a, b) => a.distance - b.distance);
+  // Best matches first when searching (ties broken by distance), otherwise nearest first.
+  list.sort((a, b) => (parsed ? b.score - a.score : 0) || a.distance - b.distance);
   state.places = list.slice(0, MAX_RESULTS);
+}
+
+// In backup mode only one category is downloaded; load what the current tab or search needs.
+function ensureData() {
+  const cat = activeCat();
+  if (state.source !== "backup" || state.elementsCat === "all" || state.elementsCat === cat) return;
+  const token = state.searchToken;
+  setLoading(true);
+  fetchNominatim(state.searchCenter, state.radius, cat).then((elements) => {
+    if (token !== state.searchToken || activeCat() !== cat) return;
+    useElements(elements, "backup", cat);
+  }).catch(() => setLoading(false));
+}
+
+// Rebuilds places (e.g. once opening hours are available), replacing the map pins too.
+function refreshPlaces() {
+  state.normCache.clear();
+  if (!state.searchCenter || (!state.places.length && state.loading)) return;
+  state.markersLayer.clearLayers();
+  state.markers.clear();
+  computePlaces();
+  render();
 }
 
 // Number badges on the category tiles.
@@ -547,6 +631,10 @@ function renderCounts() {
       const pos = positionOf(el);
       const id = `${el.type}/${el.id}`;
       if (!cat || !pos || !el.tags.name || seen.has(id) || distanceMeters(state.searchCenter, pos) > state.radius) continue;
+      if (state.parsed) { // while searching, count matches
+        const place = normalize(el);
+        if (!place || !scorePlace(place, state.parsed, place.isOpen)) continue;
+      }
       seen.add(id);
       counts[cat]++;
       counts.all++;
@@ -567,10 +655,6 @@ const isConfirmedOpen = (p) => p.isOpen === true && !p.estimated;
 function visiblePlaces() {
   let list = state.places;
   if (state.openNow) list = list.filter((p) => p.isOpen !== false);
-  if (state.query) {
-    const q = fold(state.query.trim());
-    list = list.filter((p) => p.searchText.includes(q));
-  }
   list = state.sort === "name" ? [...list].sort((a, b) => a.name.localeCompare(b.name)) : [...list];
   if (state.openNow) list.sort((a, b) => isConfirmedOpen(b) - isConfirmedOpen(a)); // stable: keeps the chosen order
   return list;
@@ -582,6 +666,7 @@ function render() {
   renderList(list);
   renderCounts();
   renderStatus(list);
+  renderSuggest();
 }
 
 function setStatus(html) {
@@ -589,12 +674,15 @@ function setStatus(html) {
 }
 
 function renderStatus(list) {
-  const cat = state.category;
+  const cat = activeCat();
   const where = `within ${formatDistance(state.radius)}`;
   if (state.source === "quick") {
     setStatus(`<b>${plural(list.length, cat)}</b> · loading the full list…`);
   } else if (!state.places.length) {
     setStatus("");
+  } else if (state.parsed) {
+    const wide = state.remote?.query === state.query && state.remote.elements.length ? ` <span class="note">· including a wider area</span>` : "";
+    setStatus(`<b>${list.length} result${list.length === 1 ? "" : "s"}</b> for “${escapeHtml(state.parsed.raw)}”${wide}`);
   } else if (state.openNow) {
     const confirmed = list.filter(isConfirmedOpen).length;
     const detail = confirmed === list.length ? "" : ` · ${confirmed} confirmed, ${list.length - confirmed} likely`;
@@ -641,8 +729,24 @@ function linksHtml(p) {
 }
 
 function renderList(list) {
+  if (!list.length && state.loading) {
+    renderSkeleton();
+    return;
+  }
+  if (!list.length && state.parsed) {
+    const wideDone = state.remote?.query === state.query;
+    const canWiden = !wideDone && (state.parsed.terms.length || state.parsed.cuisines.length);
+    els.results.innerHTML = `
+      <li class="empty">
+        <div class="empty-icon">🔎</div>
+        <h3>No matches for “${escapeHtml(state.parsed.raw)}”</h3>
+        <p>${wideDone ? "Nothing in the wider area either. Try another word." : `Nothing within ${formatDistance(state.radius)}.`}</p>
+        ${canWiden ? '<button type="button" class="btn primary wide-btn" data-action="wide-search">🔭 Search a wider area (10 km)</button>' : ""}
+      </li>`;
+    return;
+  }
   if (!list.length) {
-    const c = CATEGORIES[state.category];
+    const c = CATEGORIES[activeCat()];
     els.results.innerHTML = state.places.length
       ? emptyState("🔎", "No matches", state.openNow && !state.query
           ? `All the ${c.many} nearby are closed right now.`
@@ -751,7 +855,7 @@ function selectPlace(id, { scrollList = false, pan = false, openPopup = true } =
 
 function drawRadius() {
   if (!state.searchCenter) return;
-  const color = catColor(state.category);
+  const color = catColor(activeCat());
   if (!state.radiusCircle) {
     state.radiusCircle = L.circle(state.searchCenter, {
       radius: state.radius, color, weight: 1.5, dashArray: "6 6", fillColor: color, fillOpacity: 0.05, interactive: false,
@@ -936,9 +1040,13 @@ function getInitialPosition() {
   return new Promise((resolve) => {
     if (!navigator.geolocation) return resolve(null);
     navigator.geolocation.getCurrentPosition(
-      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      (p) => {
+        const pos = { lat: p.coords.latitude, lng: p.coords.longitude };
+        storeSet(STORE.pos, pos);
+        resolve(pos);
+      },
       () => resolve(null),
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 },
+      { enableHighAccuracy: true, timeout: 6000, maximumAge: 10 * 60 * 1000 },
     );
   });
 }
@@ -946,10 +1054,15 @@ function getInitialPosition() {
 function startWatchingPosition() {
   if (!navigator.geolocation) return;
   let lastRendered = state.userPos;
+  let lastSaved = null;
   navigator.geolocation.watchPosition(
     (p) => {
       const pos = { lat: p.coords.latitude, lng: p.coords.longitude };
       state.userPos = pos;
+      if (!lastSaved || distanceMeters(pos, lastSaved) > 100) {
+        storeSet(STORE.pos, pos);
+        lastSaved = pos;
+      }
       els.livePill.classList.add("on");
       updateUserMarker();
 
@@ -993,7 +1106,7 @@ function updateUserMarker() {
 
 function buildTabs() {
   els.tabs.innerHTML = Object.entries(CATEGORIES).map(([key, c]) => `
-    <button type="button" class="cat t-${key}" role="tab" data-cat="${key}" aria-selected="${key === state.category}">
+    <button type="button" class="cat t-${key}" role="tab" data-cat="${key}" aria-selected="${key === activeCat()}">
       <span class="emoji">${c.emoji}</span>
       <span class="label">${c.label}</span>
       <span class="count"></span>
@@ -1001,27 +1114,132 @@ function buildTabs() {
 
   els.tabs.addEventListener("click", (e) => {
     const btn = e.target.closest(".cat");
-    if (!btn || btn.dataset.cat === state.category) return;
+    if (!btn || btn.dataset.cat === activeCat()) return;
     setCategory(btn.dataset.cat);
   });
 }
 
 function setCategory(cat) {
   state.category = cat;
-  els.app.dataset.cat = cat;
-  els.logo.textContent = CATEGORIES[cat].emoji === "📍" ? "☕" : CATEGORIES[cat].emoji;
-  els.tabs.querySelectorAll(".cat").forEach((t) => t.setAttribute("aria-selected", t.dataset.cat === cat));
+  if (state.parsed) state.searchScope = cat; // a tab tapped while searching narrows the search
+  syncCategoryUI();
   clearMarkers();
-  drawRadius();
   els.results.scrollTop = 0;
 
-  // If we have the full download, switching is instant; otherwise search again.
-  if (state.source === "overpass") {
+  // If we have the data already, switching is instant; otherwise load what's missing.
+  if (state.source === "overpass" || state.parsed) {
+    ensureData();
     computePlaces();
     render();
   } else {
     search(state.searchCenter || state.map.getCenter());
   }
+}
+
+// Tabs, colors and the radius circle follow the category being shown (which a search can change).
+function syncCategoryUI() {
+  const cat = activeCat();
+  els.app.dataset.cat = cat;
+  els.logo.textContent = cat === "all" ? "☕" : CATEGORIES[cat].emoji;
+  els.tabs.querySelectorAll(".cat").forEach((t) => t.setAttribute("aria-selected", t.dataset.cat === cat));
+  drawRadius();
+}
+
+// ---------- Smart search box ----------
+
+function applyQuery(value) {
+  if (value === state.query) return;
+  const parsed = parseQuery(value);
+  state.query = value;
+  state.parsed = parsed.active ? parsed : null;
+  state.searchScope = null;
+  if (!state.parsed) state.remote = null;
+  state.selectedId = null;
+  els.results.scrollTop = 0;
+  syncCategoryUI();
+  ensureData();
+  computePlaces();
+  render();
+  renderUnderstood();
+}
+
+// Chips showing what the search understood ("🍕 Pizza  ☀️ Terrace").
+function renderUnderstood() {
+  const chips = state.parsed ? chipsFor(state.parsed, CATEGORIES) : [];
+  els.understood.classList.toggle("hidden", !chips.length);
+  els.understood.innerHTML = chips.length
+    ? `<span class="understood-label">Looking for</span>${chips.map((c) => `<span>${escapeHtml(c)}</span>`).join("")}`
+    : "";
+}
+
+let suggestIndex = -1;
+function renderSuggest() {
+  const show = document.activeElement === els.query && state.parsed && state.query.trim().length >= 2;
+  const items = show ? visiblePlaces().slice(0, 6) : [];
+  suggestIndex = -1;
+  els.suggest.classList.toggle("hidden", !items.length);
+  els.query.setAttribute("aria-expanded", String(items.length > 0));
+  els.suggest.innerHTML = items.map((p) => `
+    <li role="option" class="t-${p.cat}" data-id="${escapeHtml(p.id)}">
+      <span class="s-icon">${p.emoji}</span>
+      <span class="s-text"><b>${escapeHtml(p.name)}</b><small>${escapeHtml([p.kind, p.cuisine, formatDistance(p.distance)].filter(Boolean).join(" · "))}</small></span>
+      ${badgeHtml(p)}
+    </li>`).join("");
+}
+
+function hideSuggest() {
+  els.suggest.classList.add("hidden");
+  els.query.setAttribute("aria-expanded", "false");
+}
+
+function pickSuggestion(id) {
+  hideSuggest();
+  els.query.blur(); // closes the phone keyboard
+  selectPlace(id, { pan: true, scrollList: true });
+}
+
+function onSearchKey(e) {
+  const items = [...els.suggest.querySelectorAll("li")];
+  if ((e.key === "ArrowDown" || e.key === "ArrowUp") && items.length) {
+    e.preventDefault();
+    suggestIndex = (suggestIndex + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+    items.forEach((li, i) => li.setAttribute("aria-selected", String(i === suggestIndex)));
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    if (suggestIndex >= 0 && items[suggestIndex]) pickSuggestion(items[suggestIndex].dataset.id);
+    else { hideSuggest(); els.query.blur(); } // show the full list
+  } else if (e.key === "Escape") {
+    e.stopPropagation();
+    hideSuggest();
+  }
+}
+
+// Looks further away (about 10 km) for a name or food that isn't nearby, using Nominatim.
+async function wideSearch() {
+  const parsed = state.parsed;
+  if (!parsed || !state.searchCenter) return;
+  const query = state.query;
+  const words = parsed.terms.length ? parsed.terms.join(" ") : parsed.cuisines.map((c) => c.words[0]).join(" ");
+  const c = state.searchCenter;
+  const d = 0.09; // about 10 km
+  setLoading(true);
+  renderSkeleton();
+  setStatus(`Searching a wider area for “${escapeHtml(parsed.raw)}”…`);
+  let elements = [];
+  try {
+    const results = await nominatimFetch("search", {
+      q: words, format: "jsonv2", viewbox: [c.lng - d, c.lat + d, c.lng + d, c.lat - d].join(","),
+      bounded: "1", limit: "40", extratags: "1", addressdetails: "1",
+    });
+    elements = results.map(nominatimToElement).filter((el) => categoryOf(el.tags));
+  } catch (err) {
+    console.warn("Wider search failed:", err);
+  }
+  setLoading(false);
+  if (state.query !== query) return;
+  state.remote = { query, elements };
+  computePlaces();
+  render();
 }
 
 function clearMarkers() {
@@ -1051,8 +1269,26 @@ function wireControls() {
 
   let typing;
   els.query.addEventListener("input", () => {
+    els.clearQuery.classList.toggle("hidden", !els.query.value);
     clearTimeout(typing);
-    typing = setTimeout(() => { state.query = els.query.value; render(); }, 120);
+    typing = setTimeout(() => applyQuery(els.query.value), 120);
+  });
+  els.clearQuery.addEventListener("click", () => {
+    els.query.value = "";
+    els.clearQuery.classList.add("hidden");
+    applyQuery("");
+    els.query.focus();
+  });
+  els.query.addEventListener("keydown", onSearchKey);
+  els.query.addEventListener("focus", renderSuggest);
+  els.query.addEventListener("blur", () => setTimeout(hideSuggest, 150));
+  els.suggest.addEventListener("pointerdown", (e) => e.preventDefault()); // keep focus so the tap registers
+  els.suggest.addEventListener("click", (e) => {
+    const li = e.target.closest("[data-id]");
+    if (li) pickSuggestion(li.dataset.id);
+  });
+  els.results.addEventListener("click", (e) => {
+    if (e.target.closest("[data-action=wide-search]")) wideSearch();
   });
 
   // Directions buttons live in cards and in map popups.
@@ -1137,7 +1373,30 @@ function addBaseLayer() {
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 19,
+    updateWhenIdle: false, // load tiles while the map is still moving (Leaflet waits on phones by default)
+    keepBuffer: 4,         // keep more tiles around the view, so panning back is instant
   }).addTo(state.map);
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const el = document.createElement("script");
+    el.src = src;
+    el.onload = resolve;
+    el.onerror = reject;
+    document.head.append(el);
+  });
+}
+
+// The opening-hours library is big (~700 KB), so it loads after the map is already on screen.
+async function loadHoursLibrary() {
+  try {
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"); // needed by opening_hours
+    await loadScript("https://cdn.jsdelivr.net/npm/opening_hours@3.15.0/build/opening_hours.min.js");
+    refreshPlaces();
+  } catch (err) {
+    console.warn("Opening hours unavailable:", err);
+  }
 }
 
 // ---------- Boot ----------
@@ -1149,7 +1408,10 @@ async function init() {
   }
 
   const fallback = CONFIG.DEFAULT_CENTER || { lat: 40.4168, lng: -3.7038 };
-  state.map = L.map("map", { zoomControl: false }).setView(fallback, 15);
+  const last = storeGet(STORE.pos);
+  const saved = storeGet(STORE.area);
+  if (saved?.elements && Date.now() - saved.time < 24 * 3600 * 1000) state.staleArea = saved;
+  state.map = L.map("map", { zoomControl: false }).setView(last || fallback, last ? 16 : 15);
   L.control.zoom({ position: "topright" }).addTo(state.map);
   // Zoom buttons flash white when tapped, then fade back to normal.
   state.map.getContainer().querySelectorAll(".leaflet-control-zoom a").forEach((a) => {
@@ -1163,10 +1425,18 @@ async function init() {
 
   buildTabs();
   wireControls();
+  setTimeout(loadHoursLibrary, 300); // in parallel; the map doesn't wait for it
+
+  // Returning visitor: start right away where they were last time; live GPS takes over when it arrives.
+  if (last) {
+    search(last);
+    startWatchingPosition();
+    return;
+  }
+
   renderSkeleton();
   setLoading(true);
   setStatus("Finding your location…");
-
   const userPos = await getInitialPosition();
   state.userPos = userPos;
   const center = userPos || fallback;

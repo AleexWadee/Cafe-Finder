@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Find cafes, pubs, bars and restaurants near you on a live Google Map.",
   "private": true,
+  "type": "module",
   "scripts": {
     "start": "npx --yes serve -l 5173 ."
   }
