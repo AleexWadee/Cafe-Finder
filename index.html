@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Find cafés, pubs, bars and restaurants near you on a live map powered by Google Maps." />
+    <title>Cafe Finder</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand__logo" aria-hidden="true">☕</span>
+        <div>
+          <h1 class="brand__title">Cafe Finder</h1>
+          <p class="brand__tagline">Cafés, pubs, bars &amp; restaurants near you</p>
+        </div>
+      </div>
+
+      <nav class="categories" aria-label="Place categories">
+        <button class="chip is-active" data-category="cafe" aria-pressed="true">☕ Cafés</button>
+        <button class="chip" data-category="pub" aria-pressed="false">🍺 Pubs</button>
+        <button class="chip" data-category="bar" aria-pressed="false">🍸 Bars</button>
+        <button class="chip" data-category="restaurant" aria-pressed="false">🍽️ Restaurants</button>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar" aria-label="Search results">
+        <div class="controls">
+          <label class="control">
+            <span>Radius</span>
+            <select id="radius">
+              <option value="500">500 m</option>
+              <option value="1000" selected>1 km</option>
+              <option value="2000">2 km</option>
+              <option value="5000">5 km</option>
+            </select>
+          </label>
+          <label class="control">
+            <span>Sort by</span>
+            <select id="sort">
+              <option value="distance" selected>Distance</option>
+              <option value="rating">Rating</option>
+            </select>
+          </label>
+          <label class="control control--check">
+            <input type="checkbox" id="open-now" />
+            <span>Open now</span>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="locate" class="button button--primary" type="button">📍 Use my location</button>
+          <button id="search-area" class="button" type="button">🔄 Search this area</button>
+        </div>
+
+        <p id="status" class="status" role="status" aria-live="polite">Loading map…</p>
+        <ol id="results" class="results"></ol>
+      </aside>
+
+      <section class="map-wrap">
+        <div id="map" class="map" aria-label="Map"></div>
+        <label class="live-toggle">
+          <input type="checkbox" id="live" checked />
+          <span>Live tracking</span>
+        </label>
+      </section>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

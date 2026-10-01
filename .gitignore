@@ -1,0 +1,7 @@
+# Local configuration containing your Google Maps API key
+config.js
+
+# OS / editor clutter
+.DS_Store
+Thumbs.db
+node_modules/
