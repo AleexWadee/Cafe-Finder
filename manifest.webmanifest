@@ -1,0 +1,13 @@
+{
+  "name": "SpotHop",
+  "short_name": "SpotHop",
+  "description": "Find cafés, pubs, bars and restaurants near you on a live map.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#12100e",
+  "theme_color": "#1a1714",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

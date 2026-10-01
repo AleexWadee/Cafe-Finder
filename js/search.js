@@ -1,3 +1,5 @@
+import { t } from "./i18n.js";
+
 // SpotHop smart search — understands what people type (English or Spanish):
 //   kinds of place ("cerveza" → pubs), food ("pizza", "sushi"), features ("terraza", "wifi"),
 //   "open now", and place names with typos ("starbuks" → Starbucks).
@@ -21,45 +23,45 @@ const CATEGORY_WORDS = {
 
 // Food: words → OSM cuisine values, plus name fragments (a "Pizzería Napoli" has no cuisine tag but is clearly pizza).
 const CUISINES = [
-  { label: "Pizza", emoji: "🍕", words: ["pizza", "pizzas", "pizzeria", "pizzerias"], values: ["pizza", "italian"], hints: ["pizz"] },
-  { label: "Italian", emoji: "🍝", words: ["italian", "italiano", "italiana", "pasta"], values: ["italian", "pizza", "pasta"], hints: ["trattoria", "pasta"] },
-  { label: "Sushi", emoji: "🍣", words: ["sushi"], values: ["sushi", "japanese"], hints: ["sushi"] },
-  { label: "Japanese", emoji: "🍜", words: ["japanese", "japones", "japonesa", "ramen"], values: ["japanese", "sushi", "ramen"], hints: ["ramen", "sushi"] },
-  { label: "Burgers", emoji: "🍔", words: ["burger", "burgers", "hamburguesa", "hamburguesas", "hamburgueseria"], values: ["burger", "american"], hints: ["burger", "hamburg"] },
-  { label: "Tapas", emoji: "🫒", words: ["tapas", "tapa", "tapeo", "pinchos", "pintxos"], values: ["tapas", "spanish", "regional"], hints: ["tapa", "taberna", "tasca"] },
-  { label: "Spanish", emoji: "🥘", words: ["spanish", "espanol", "espanola", "paella"], values: ["spanish", "regional", "tapas", "paella"], hints: ["paella"] },
-  { label: "Canarian", emoji: "🌋", words: ["canarian", "canario", "canaria", "guachinche", "papas arrugadas"], values: ["canarian", "regional", "spanish"], hints: ["guachinche"] },
-  { label: "Chinese", emoji: "🥡", words: ["chinese", "chino", "china"], values: ["chinese"], hints: ["chino", "china", "wok"] },
-  { label: "Asian", emoji: "🥢", words: ["asian", "asiatico", "asiatica", "wok"], values: ["asian", "chinese", "japanese", "thai", "vietnamese", "korean"], hints: ["wok", "asia"] },
-  { label: "Thai", emoji: "🍲", words: ["thai", "tailandes", "tailandesa"], values: ["thai"], hints: ["thai"] },
-  { label: "Korean", emoji: "🍱", words: ["korean", "coreano", "coreana"], values: ["korean"], hints: ["korea"] },
-  { label: "Mexican", emoji: "🌮", words: ["mexican", "mexicano", "mexicana", "tacos", "taco", "burrito", "burritos"], values: ["mexican", "tex-mex", "tacos"], hints: ["taco", "mexic"] },
-  { label: "Indian", emoji: "🍛", words: ["indian", "indio", "india", "hindu", "curry", "tandoori"], values: ["indian", "curry", "pakistani", "nepalese"], hints: ["india", "curry", "tandoori", "masala"] },
-  { label: "Kebab", emoji: "🥙", words: ["kebab", "kebabs", "kebap", "doner", "shawarma", "falafel"], values: ["kebab", "turkish", "doner", "shawarma", "middle_eastern", "lebanese", "falafel"], hints: ["kebab", "doner", "shawarma"] },
-  { label: "Seafood", emoji: "🦐", words: ["seafood", "marisco", "mariscos", "pescado", "fish", "marisqueria"], values: ["seafood", "fish"], hints: ["marisq", "pescad"] },
-  { label: "Grill", emoji: "🥩", words: ["steak", "carne", "carnes", "grill", "parrilla", "asador", "asado", "bbq", "barbacoa"], values: ["steak_house", "grill", "barbecue", "argentinian", "brazilian"], hints: ["asador", "parrilla", "grill", "steak"] },
-  { label: "Chicken", emoji: "🍗", words: ["chicken", "pollo", "pollos"], values: ["chicken"], hints: ["pollo", "chicken"] },
-  { label: "Sandwiches", emoji: "🥪", words: ["sandwich", "sandwiches", "bocadillo", "bocadillos", "bocata", "bocatas"], values: ["sandwich"], hints: ["bocad", "bocata", "sandwich"] },
-  { label: "Venezuelan", emoji: "🫓", words: ["venezuelan", "venezolano", "venezolana", "arepa", "arepas", "arepera"], values: ["venezuelan", "arepa"], hints: ["arep"] },
-  { label: "Latin", emoji: "🌶️", words: ["peruvian", "peruano", "peruana", "argentinian", "argentino", "argentina", "colombian", "colombiano", "cuban", "cubano"], values: ["peruvian", "argentinian", "colombian", "cuban", "latin_american"], hints: [] },
-  { label: "Healthy", emoji: "🥗", words: ["healthy", "saludable", "poke", "bowl", "ensalada", "salad", "salads"], values: ["healthy", "poke", "salad", "vegetarian", "vegan"], hints: ["poke", "salad"] },
-  { label: "Desserts", emoji: "🍰", words: ["dessert", "desserts", "postre", "postres", "cake", "cakes", "tarta", "tartas", "pasteleria", "dulces", "crepe", "crepes", "gofres", "waffles"], values: ["dessert", "cake", "pastry", "crepe", "waffle"], hints: ["pastel", "crep", "dulce"] },
+  { id: "pizza", emoji: "🍕", words: ["pizza", "pizzas", "pizzeria", "pizzerias"], values: ["pizza", "italian"], hints: ["pizz"] },
+  { id: "italian", emoji: "🍝", words: ["italian", "italiano", "italiana", "pasta"], values: ["italian", "pizza", "pasta"], hints: ["trattoria", "pasta"] },
+  { id: "sushi", emoji: "🍣", words: ["sushi"], values: ["sushi", "japanese"], hints: ["sushi"] },
+  { id: "japanese", emoji: "🍜", words: ["japanese", "japones", "japonesa", "ramen"], values: ["japanese", "sushi", "ramen"], hints: ["ramen", "sushi"] },
+  { id: "burgers", emoji: "🍔", words: ["burger", "burgers", "hamburguesa", "hamburguesas", "hamburgueseria"], values: ["burger", "american"], hints: ["burger", "hamburg"] },
+  { id: "tapas", emoji: "🫒", words: ["tapas", "tapa", "tapeo", "pinchos", "pintxos"], values: ["tapas", "spanish", "regional"], hints: ["tapa", "taberna", "tasca"] },
+  { id: "spanish", emoji: "🥘", words: ["spanish", "espanol", "espanola", "paella"], values: ["spanish", "regional", "tapas", "paella"], hints: ["paella"] },
+  { id: "canarian", emoji: "🌋", words: ["canarian", "canario", "canaria", "guachinche", "papas arrugadas"], values: ["canarian", "regional", "spanish"], hints: ["guachinche"] },
+  { id: "chinese", emoji: "🥡", words: ["chinese", "chino", "china"], values: ["chinese"], hints: ["chino", "china", "wok"] },
+  { id: "asian", emoji: "🥢", words: ["asian", "asiatico", "asiatica", "wok"], values: ["asian", "chinese", "japanese", "thai", "vietnamese", "korean"], hints: ["wok", "asia"] },
+  { id: "thai", emoji: "🍲", words: ["thai", "tailandes", "tailandesa"], values: ["thai"], hints: ["thai"] },
+  { id: "korean", emoji: "🍱", words: ["korean", "coreano", "coreana"], values: ["korean"], hints: ["korea"] },
+  { id: "mexican", emoji: "🌮", words: ["mexican", "mexicano", "mexicana", "tacos", "taco", "burrito", "burritos"], values: ["mexican", "tex-mex", "tacos"], hints: ["taco", "mexic"] },
+  { id: "indian", emoji: "🍛", words: ["indian", "indio", "india", "hindu", "curry", "tandoori"], values: ["indian", "curry", "pakistani", "nepalese"], hints: ["india", "curry", "tandoori", "masala"] },
+  { id: "kebab", emoji: "🥙", words: ["kebab", "kebabs", "kebap", "doner", "shawarma", "falafel"], values: ["kebab", "turkish", "doner", "shawarma", "middle_eastern", "lebanese", "falafel"], hints: ["kebab", "doner", "shawarma"] },
+  { id: "seafood", emoji: "🦐", words: ["seafood", "marisco", "mariscos", "pescado", "fish", "marisqueria"], values: ["seafood", "fish"], hints: ["marisq", "pescad"] },
+  { id: "grill", emoji: "🥩", words: ["steak", "carne", "carnes", "grill", "parrilla", "asador", "asado", "bbq", "barbacoa"], values: ["steak_house", "grill", "barbecue", "argentinian", "brazilian"], hints: ["asador", "parrilla", "grill", "steak"] },
+  { id: "chicken", emoji: "🍗", words: ["chicken", "pollo", "pollos"], values: ["chicken"], hints: ["pollo", "chicken"] },
+  { id: "sandwiches", emoji: "🥪", words: ["sandwich", "sandwiches", "bocadillo", "bocadillos", "bocata", "bocatas"], values: ["sandwich"], hints: ["bocad", "bocata", "sandwich"] },
+  { id: "venezuelan", emoji: "🫓", words: ["venezuelan", "venezolano", "venezolana", "arepa", "arepas", "arepera"], values: ["venezuelan", "arepa"], hints: ["arep"] },
+  { id: "latin", emoji: "🌶️", words: ["peruvian", "peruano", "peruana", "argentinian", "argentino", "argentina", "colombian", "colombiano", "cuban", "cubano"], values: ["peruvian", "argentinian", "colombian", "cuban", "latin_american"], hints: [] },
+  { id: "healthy", emoji: "🥗", words: ["healthy", "saludable", "poke", "bowl", "ensalada", "salad", "salads"], values: ["healthy", "poke", "salad", "vegetarian", "vegan"], hints: ["poke", "salad"] },
+  { id: "desserts", emoji: "🍰", words: ["dessert", "desserts", "postre", "postres", "cake", "cakes", "tarta", "tartas", "pasteleria", "dulces", "crepe", "crepes", "gofres", "waffles"], values: ["dessert", "cake", "pastry", "crepe", "waffle"], hints: ["pastel", "crep", "dulce"] },
 ];
 
 // Features: words → a check on the place's OpenStreetMap tags.
 const yes = (tags, k) => tags[k] === "yes" || tags[k] === "only";
 const FEATURES = [
-  { label: "Terrace", emoji: "☀️", words: ["terrace", "terraza", "terrazas", "outdoor", "outside", "fuera", "exterior", "patio", "al aire libre"], test: (t) => yes(t, "outdoor_seating") },
-  { label: "Wi-Fi", emoji: "📶", words: ["wifi", "wi fi", "internet", "wlan"], test: (t) => t.internet_access && t.internet_access !== "no" },
-  { label: "Takeaway", emoji: "🥡", words: ["takeaway", "take away", "to go", "para llevar", "llevar"], test: (t) => yes(t, "takeaway") },
-  { label: "Delivery", emoji: "🛵", words: ["delivery", "domicilio", "a domicilio", "reparto"], test: (t) => yes(t, "delivery") },
-  { label: "Vegan", emoji: "🌱", words: ["vegan", "vegano", "vegana", "veganos", "veganas"], test: (t) => yes(t, "diet:vegan") || /vegan/.test(t.cuisine || "") },
-  { label: "Vegetarian", emoji: "🥗", words: ["vegetarian", "vegetariano", "vegetariana", "vegetarianos", "veggie"], test: (t) => yes(t, "diet:vegetarian") || yes(t, "diet:vegan") || /vegetarian|vegan/.test(t.cuisine || "") },
-  { label: "Gluten-free", emoji: "🌾", words: ["gluten free", "glutenfree", "sin gluten", "celiaco", "celiacos", "celiac"], test: (t) => yes(t, "diet:gluten_free") },
-  { label: "Accessible", emoji: "♿", words: ["accessible", "accesible", "wheelchair", "silla de ruedas"], test: (t) => yes(t, "wheelchair") },
-  { label: "Live music", emoji: "🎵", words: ["live music", "musica en vivo", "musica en directo", "musica", "music", "concierto", "conciertos"], test: (t) => yes(t, "live_music") },
-  { label: "Sports", emoji: "📺", words: ["sports", "sport", "deportes", "futbol", "football", "partido", "partidos"], test: (t) => Boolean(t.sport) },
-  { label: "Dog friendly", emoji: "🐶", words: ["dog", "dogs", "perro", "perros", "pet", "pets", "mascota", "mascotas", "dog friendly"], test: (t) => yes(t, "dog") },
+  { id: "terrace", emoji: "☀️", words: ["terrace", "terraza", "terrazas", "outdoor", "outside", "fuera", "exterior", "patio", "al aire libre"], test: (t) => yes(t, "outdoor_seating") },
+  { id: "wifi", emoji: "📶", words: ["wifi", "wi fi", "internet", "wlan"], test: (t) => t.internet_access && t.internet_access !== "no" },
+  { id: "takeaway", emoji: "🥡", words: ["takeaway", "take away", "to go", "para llevar", "llevar"], test: (t) => yes(t, "takeaway") },
+  { id: "delivery", emoji: "🛵", words: ["delivery", "domicilio", "a domicilio", "reparto"], test: (t) => yes(t, "delivery") },
+  { id: "vegan", emoji: "🌱", words: ["vegan", "vegano", "vegana", "veganos", "veganas"], test: (t) => yes(t, "diet:vegan") || /vegan/.test(t.cuisine || "") },
+  { id: "vegetarian", emoji: "🥗", words: ["vegetarian", "vegetariano", "vegetariana", "vegetarianos", "veggie"], test: (t) => yes(t, "diet:vegetarian") || yes(t, "diet:vegan") || /vegetarian|vegan/.test(t.cuisine || "") },
+  { id: "glutenFree", emoji: "🌾", words: ["gluten free", "glutenfree", "sin gluten", "celiaco", "celiacos", "celiac"], test: (t) => yes(t, "diet:gluten_free") },
+  { id: "accessible", emoji: "♿", words: ["accessible", "accesible", "wheelchair", "silla de ruedas"], test: (t) => yes(t, "wheelchair") },
+  { id: "liveMusic", emoji: "🎵", words: ["live music", "musica en vivo", "musica en directo", "musica", "music", "concierto", "conciertos"], test: (t) => yes(t, "live_music") },
+  { id: "sports", emoji: "📺", words: ["sports", "sport", "deportes", "futbol", "football", "partido", "partidos"], test: (t) => Boolean(t.sport) },
+  { id: "dogFriendly", emoji: "🐶", words: ["dog", "dogs", "perro", "perros", "pet", "pets", "mascota", "mascotas", "dog friendly"], test: (t) => yes(t, "dog") },
 ];
 
 const OPEN_WORDS = ["open", "open now", "abierto", "abiertos", "abierta", "abiertas", "abierto ahora", "ahora", "now"];
@@ -163,13 +165,13 @@ export function scorePlace(place, parsed, isOpenNow) {
   return score;
 }
 
-// The "understood" chips shown under the search box.
+// The "understood" chips shown under the search box, in the current language.
 export function chipsFor(parsed, categories) {
   const chips = [];
-  for (const cat of parsed.cats) chips.push(`${categories[cat].emoji} ${categories[cat].label}`);
-  for (const c of parsed.cuisines) chips.push(`${c.emoji} ${c.label}`);
-  for (const f of parsed.features) chips.push(`${f.emoji} ${f.label}`);
-  if (parsed.openNow) chips.push("🟢 Open now");
+  for (const cat of parsed.cats) chips.push(`${categories[cat].emoji} ${t(`cat.${cat}.label`)}`);
+  for (const c of parsed.cuisines) chips.push(`${c.emoji} ${t(`cuisine.${c.id}`)}`);
+  for (const f of parsed.features) chips.push(`${f.emoji} ${t(`feature.${f.id}`)}`);
+  if (parsed.openNow) chips.push(`🟢 ${t("ui.openNow")}`);
   if (parsed.terms.length) chips.push(`🔤 “${parsed.terms.join(" ")}”`);
   return chips;
 }

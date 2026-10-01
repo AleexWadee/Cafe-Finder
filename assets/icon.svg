@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- SpotHop app icon: a map pin with a coffee cup -->
+  <rect width="512" height="512" rx="112" fill="#1a1714"/>
+  <path d="M256 72c-84 0-152 66-152 148 0 108 152 232 152 232s152-124 152-232c0-82-68-148-152-148z" fill="#d9a273"/>
+  <circle cx="256" cy="220" r="96" fill="#1a1714"/>
+  <path d="M206 186h92v44a46 46 0 0 1-92 0z" fill="#f4efe9"/>
+  <path d="M298 196h10a20 20 0 0 1 0 40h-12" fill="none" stroke="#f4efe9" stroke-width="12"/>
+  <path d="M226 150c-8 10 8 16 0 26M252 146c-8 10 8 16 0 26M278 150c-8 10 8 16 0 26" fill="none" stroke="#d9a273" stroke-width="8" stroke-linecap="round"/>
+</svg>

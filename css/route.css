@@ -1,0 +1,79 @@
+/* Directions panel (shown instead of the list while a route is open). */
+
+.app.routing .controls,
+.app.routing .list-head,
+.app.routing .results { display: none; }
+.app.routing .pin:not(.active) { opacity: .35; }
+.app.routing .search-area { display: none; }
+
+.route {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.route-top { padding-top: 2px; }
+.back {
+  border: none;
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.route-dest { display: flex; align-items: center; gap: 14px; }
+.route-dest-text { min-width: 0; }
+.route-dest h2 { margin: 0 0 4px; font-size: 19px; letter-spacing: -0.02em; }
+.route-dest-meta { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+
+.route-summary {
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 12%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.route-time { font-size: 30px; font-weight: 800; letter-spacing: -0.03em; color: var(--accent); }
+.route-sub { font-size: 14px; font-weight: 600; margin-top: 2px; }
+.route-from { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); margin-top: 8px; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 1.6s infinite; flex: none; }
+.route-arrived {
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--open) 15%, var(--panel));
+  color: var(--open);
+  font-weight: 700;
+}
+.route-msg { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 30px 10px; color: var(--muted); text-align: center; font-size: 14px; }
+.route-msg .spinner { display: inline-block; }
+
+/* Turn-by-turn steps */
+.steps { list-style: none; margin: 0; padding: 0; }
+.steps li {
+  display: flex;
+  gap: 14px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.steps li:last-child { border-bottom: none; font-weight: 700; }
+.steps small { color: var(--muted); font-size: 12px; }
+.step-icon {
+  flex: none;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--surface);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+@media (max-width: 760px) {
+  .route { padding: 0 16px 24px; overflow: visible; flex: none; }
+}

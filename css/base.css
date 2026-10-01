@@ -1,0 +1,177 @@
+/* Colors, fonts, page layout and shared bits (buttons, chips, spinner). */
+
+:root {
+  --bg: #f6f4f1;
+  --panel: #ffffff;
+  --surface: #f6f3ef;
+  --surface-2: #efebe5;
+  --text: #1f1b16;
+  --muted: #6f675e;
+  --border: #e6e0d8;
+  --open: #15803d;
+  --closed: #b91c1c;
+  --shadow: 0 6px 24px rgba(30, 20, 10, 0.12);
+  --radius: 14px;
+
+  /* One color per category */
+  --c-coffee: #9a5b2c;
+  --c-pubs: #c26a06;
+  --c-bars: #7c3aed;
+  --c-restaurants: #dc2626;
+  --c-all: #0d9488;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12100e;
+    --panel: #1a1714;
+    --surface: #221e1a;
+    --surface-2: #2b2621;
+    --text: #f4efe9;
+    --muted: #a59b90;
+    --border: #312b25;
+    --open: #4ade80;
+    --closed: #f87171;
+    --shadow: 0 6px 24px rgba(0, 0, 0, 0.55);
+
+    --c-coffee: #d9a273;
+    --c-pubs: #f5b13d;
+    --c-bars: #a78bfa;
+    --c-restaurants: #f87171;
+    --c-all: #2dd4bf;
+  }
+}
+
+.t-coffee { --cat: var(--c-coffee); }
+.t-pubs { --cat: var(--c-pubs); }
+.t-bars { --cat: var(--c-bars); }
+.t-restaurants { --cat: var(--c-restaurants); }
+.t-all { --cat: var(--c-all); }
+
+/* The whole UI takes on the selected category's color */
+.app[data-cat="coffee"] { --accent: var(--c-coffee); }
+.app[data-cat="pubs"] { --accent: var(--c-pubs); }
+.app[data-cat="bars"] { --accent: var(--c-bars); }
+.app[data-cat="restaurants"] { --accent: var(--c-restaurants); }
+.app[data-cat="all"] { --accent: var(--c-all); }
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent; /* no grey box when tapping on phones */
+}
+
+button { font: inherit; color: inherit; }
+
+.hidden { display: none !important; }
+.muted { color: var(--muted); }
+
+/* Layout: list on the left, map on the right */
+.app {
+  display: grid;
+  grid-template-columns: 440px 1fr;
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* Buttons */
+.btn {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  transition: border-color .15s;
+}
+.btn.primary { background: var(--cat, var(--accent)); border-color: transparent; color: #fff; }
+@media (prefers-color-scheme: dark) {
+  .btn.primary { color: #1a1714; }
+}
+
+/* Segmented buttons (distance, sort, language, travel mode) */
+.segmented {
+  display: flex;
+  padding: 3px;
+  border-radius: 11px;
+  background: var(--surface);
+}
+.segmented button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+.segmented button[aria-checked="true"] {
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+}
+@media (prefers-color-scheme: dark) {
+  .segmented button[aria-checked="true"] { background: var(--surface-2); }
+}
+
+/* Chips (features, "Looking for") */
+.chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+.chips span {
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.spinner {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(34, 197, 94, .25); } }
+
+/* Hover effects only on devices with a mouse, so they don't get stuck after a tap on phones. */
+@media (hover: hover) {
+  .cat:hover { background: var(--surface); }
+  .segmented button:hover { color: var(--text); }
+  .card:hover { background: var(--surface); }
+  .btn:hover { border-color: var(--cat, var(--accent)); }
+  .search-area:hover { background: var(--surface); }
+  .back:hover { background: var(--surface-2); }
+  .leaflet-bar a:hover { background: var(--surface); }
+  .suggest li:hover { background: var(--surface); }
+  .info-value a:hover { text-decoration: underline; }
+}
+
+/* Tap feedback on touch screens: a quick flash while the finger is down. */
+.map-btn:active, .back:active, .btn:active, .segmented button:active { filter: brightness(1.25); }
+.card:active { background: var(--surface); }
+
+/* Phones: map on top, panel below */
+@media (max-width: 760px) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: 42dvh 1fr;
+  }
+  .map-wrap { grid-row: 1; }
+  .panel { grid-row: 2; border-right: none; border-top: 1px solid var(--border); overflow-y: auto; }
+}

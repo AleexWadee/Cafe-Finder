@@ -3,9 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SpotHop — Cafes, Pubs, Bars & Restaurants Near You</title>
+  <title>SpotHop — Cafés, Pubs, Bars & Restaurants Near You</title>
   <meta name="description" content="Find coffee places, pubs, bars and restaurants near you on a live map." />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>" />
+  <meta name="theme-color" content="#1a1714" />
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/icon.svg" />
+  <link rel="manifest" href="manifest.webmanifest" />
+
   <!-- Open connections early so the map, data and fonts arrive sooner -->
   <link rel="preconnect" href="https://tile.openstreetmap.org" />
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
@@ -15,8 +19,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <!-- Font loads without blocking the page (system font is used until it arrives) -->
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" onload="this.rel='stylesheet'" />
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/panel.css" />
+  <link rel="stylesheet" href="css/places.css" />
+  <link rel="stylesheet" href="css/map.css" />
+  <link rel="stylesheet" href="css/route.css" />
 </head>
 <body>
   <div class="app" id="app" data-cat="coffee">
@@ -25,28 +34,29 @@
         <div class="logo" id="logo">☕</div>
         <div class="brand-text">
           <h1>SpotHop</h1>
-          <p class="location" id="placeName">Finding your location…</p>
+          <p class="location" id="placeName" data-i18n="ui.findingLocation">Finding your location…</p>
         </div>
+        <div class="segmented lang-switch" id="langSwitch" role="radiogroup" data-i18n-aria-label="ui.language"></div>
       </header>
 
       <div class="controls">
         <div class="search-wrap">
           <label class="search">
             <span class="search-icon" aria-hidden="true">🔍</span>
-            <input id="query" type="text" inputmode="search" enterkeyhint="search"
-              placeholder="Try “pizza con terraza”, “cerveza” or a name…" autocomplete="off"
+            <input id="query" type="text" inputmode="search" enterkeyhint="search" autocomplete="off"
+              data-i18n-placeholder="ui.searchPlaceholder"
               role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list" />
-            <button type="button" class="clear-query hidden" id="clearQuery" aria-label="Clear search">✕</button>
+            <button type="button" class="clear-query hidden" id="clearQuery" data-i18n-aria-label="ui.clearSearch">✕</button>
           </label>
           <ul class="suggest hidden" id="suggest" role="listbox"></ul>
         </div>
         <div class="chips understood hidden" id="understood" aria-live="polite"></div>
 
-        <div class="cats" id="tabs" role="tablist" aria-label="Categories"></div>
+        <div class="cats" id="tabs" role="tablist" data-i18n-aria-label="ui.categories"></div>
 
         <div class="filter-block">
-          <span class="filter-label">Distance</span>
-          <div class="segmented" id="radius" role="radiogroup" aria-label="Distance">
+          <span class="filter-label" data-i18n="ui.distance">Distance</span>
+          <div class="segmented" id="radius" role="radiogroup" data-i18n-aria-label="ui.distance">
             <button type="button" data-value="500">500 m</button>
             <button type="button" data-value="1000" aria-checked="true">1 km</button>
             <button type="button" data-value="2000">2 km</button>
@@ -56,16 +66,16 @@
 
         <div class="filter-row">
           <div class="filter-block">
-            <span class="filter-label">Sort</span>
-            <div class="segmented" id="sort" role="radiogroup" aria-label="Sort">
-              <button type="button" data-value="distance" aria-checked="true">Nearest</button>
-              <button type="button" data-value="name">A–Z</button>
+            <span class="filter-label" data-i18n="ui.sort">Sort</span>
+            <div class="segmented" id="sort" role="radiogroup" data-i18n-aria-label="ui.sort">
+              <button type="button" data-value="distance" aria-checked="true" data-i18n="ui.nearest">Nearest</button>
+              <button type="button" data-value="name" data-i18n="ui.az">A–Z</button>
             </div>
           </div>
           <label class="switch">
             <input type="checkbox" id="openNow" />
             <span class="track"><span class="thumb-dot"></span></span>
-            <span>Open now</span>
+            <span data-i18n="ui.openNow">Open now</span>
           </label>
         </div>
       </div>
@@ -82,15 +92,14 @@
 
     <main class="map-wrap">
       <div id="map"></div>
-      <button class="map-btn search-area hidden" id="searchAreaBtn">🔄 Search this area</button>
-      <button class="map-btn locate" id="locateBtn" title="Go to my location" aria-label="Go to my location">◎</button>
-      <div class="live-pill" id="livePill"><span class="dot"></span> Live location</div>
+      <button class="map-btn search-area hidden" id="searchAreaBtn" data-i18n="ui.searchArea">🔄 Search this area</button>
+      <button class="map-btn locate" id="locateBtn" data-i18n-title="ui.myLocation" data-i18n-aria-label="ui.myLocation">◎</button>
+      <div class="live-pill" id="livePill"><span class="dot"></span> <span data-i18n="ui.liveLocation">Live location</span></div>
     </main>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-  <!-- The opening-hours library (~700 KB) is loaded by app.js after the map is on screen -->
-  <script src="config.js"></script>
-  <script src="app.js" type="module"></script>
+  <!-- The app (js/main.js loads the other modules; the big opening-hours library loads after the map) -->
+  <script src="js/main.js" type="module"></script>
 </body>
 </html>

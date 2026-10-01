@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.1.0 — 2026-10-01
+
+### Languages
+- English and Spanish, switched with **EN | ES** in the header. The device's language is used on the first visit and the choice is remembered.
+- Everything is translated: menus, place details, opening hours and day names, search chips, turn-by-turn directions, and the neighbourhood name.
+- New languages can be added with one file in `js/locales/`.
+
+### Tidier project
+- The single `app.js` (about 1,400 lines) is split into 16 modules in `js/`, one per job.
+- `style.css` is split into 5 files in `css/`.
+- Added an app icon (`assets/icon.svg`), a web manifest so phones can add SpotHop to the home screen, and `.editorconfig`.
+
+### Earlier in 1.1.0
+- Smart search in English and Spanish, with suggestions, typo tolerance and a wider-area search.
+- Faster start: the map appears first, and the last location and results are remembered on the device.
+- Place details (phone, website, email, socials, timetable) in the list and the map popup. Clicking a place again closes it.
+- Buttons no longer stay white after tapping on phones.
+
 ## 1.0.0 — 2026-10-01
 
 ### Started with Google Maps, switched to free OpenStreetMap
