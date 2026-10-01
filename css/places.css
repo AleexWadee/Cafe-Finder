@@ -7,7 +7,33 @@
   min-height: 46px;
   padding: 12px 24px 6px;
 }
-.status { font-size: 13px; color: var(--muted); }
+.status { flex: 1; min-width: 0; font-size: 13px; color: var(--muted); }
+
+/* "♡ Saved" button */
+.saved-btn {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 10px;
+  padding: 5px 11px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.saved-heart::before { content: "♡"; }
+.saved-count { color: var(--muted); font-variant-numeric: tabular-nums; }
+.saved-count:empty { display: none; }
+.saved-btn[aria-pressed="true"] {
+  color: var(--heart);
+  border-color: var(--heart);
+  background: color-mix(in srgb, var(--heart) 12%, var(--panel));
+}
+.saved-btn[aria-pressed="true"] .saved-heart::before { content: "❤️"; }
+.app.saved-mode .filter-block:has(#radius) { opacity: .4; pointer-events: none; } /* distance doesn't apply to saved places */
 .status b { color: var(--text); font-weight: 700; }
 .status .note { color: var(--muted); }
 
@@ -102,6 +128,25 @@
 .hours-note a { color: var(--cat, var(--accent)); font-weight: 600; }
 
 .actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.btn.fav[aria-pressed="true"] { border-color: var(--heart); color: var(--heart); }
+
+/* Small round buttons on a card (📞 call, ♡ save) */
+.icon-btn {
+  flex: none;
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .12s, background .15s;
+}
+.icon-btn:active { transform: scale(.88); background: var(--surface-2); }
+.icon-btn.fav[aria-pressed="true"] { color: var(--heart); }
 
 /* "Likely open" divider */
 .divider {

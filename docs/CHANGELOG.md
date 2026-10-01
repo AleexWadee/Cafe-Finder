@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.2.0 — 2026-10-01
+
+### More languages
+- German, French, Italian and Portuguese, alongside English and Spanish, in a compact 🌐 menu.
+- The search understands words in all six languages ("Bier mit Terrasse", "bière", "birra all'aperto", "cerveja com esplanada").
+
+### Phone numbers
+- A 📞 button on each card with a phone number calls the place in one tap.
+- Places without a number on OpenStreetMap get a "Find the phone number online" link that searches the web for it.
+- WhatsApp links when a place lists one.
+
+### New
+- ❤️ Saved places: ♡ on any place keeps it on the device; **Saved** lists them wherever they are.
+- 🔗 Share: a link that opens SpotHop right on that place (phone share menu, or copied link).
+- Category, distance and sort are remembered between visits.
+- New app icon, with PNG versions for phone home screens.
+
+### Fixed
+- An opened place no longer closes when the opening-hours data finishes loading.
+
 ## 1.1.0 — 2026-10-01
 
 ### Languages

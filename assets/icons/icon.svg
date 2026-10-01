@@ -1,9 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- SpotHop app icon: a map pin with a coffee cup -->
-  <rect width="512" height="512" rx="112" fill="#1a1714"/>
-  <path d="M256 72c-84 0-152 66-152 148 0 108 152 232 152 232s152-124 152-232c0-82-68-148-152-148z" fill="#d9a273"/>
-  <circle cx="256" cy="220" r="96" fill="#1a1714"/>
-  <path d="M206 186h92v44a46 46 0 0 1-92 0z" fill="#f4efe9"/>
-  <path d="M298 196h10a20 20 0 0 1 0 40h-12" fill="none" stroke="#f4efe9" stroke-width="12"/>
-  <path d="M226 150c-8 10 8 16 0 26M252 146c-8 10 8 16 0 26M278 150c-8 10 8 16 0 26" fill="none" stroke="#d9a273" stroke-width="8" stroke-linecap="round"/>
+  <!-- SpotHop: a map pin with a steaming cup, on a warm sunset gradient -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffa53d"/>
+      <stop offset="1" stop-color="#e8436b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <ellipse cx="256" cy="452" rx="74" ry="14" fill="#7a1530" opacity=".22"/>
+  <path d="M256 70c-77 0-140 61-140 137 0 104 140 241 140 241s140-137 140-241c0-76-63-137-140-137z" fill="#fff"/>
+  <g fill="none" stroke="#ef5a5c" stroke-width="10" stroke-linecap="round">
+    <path d="M226 176c-9-11 9-17 0-30"/>
+    <path d="M252 176c-9-11 9-17 0-30"/>
+    <path d="M278 176c-9-11 9-17 0-30"/>
+    <path d="M298 207h9a19 19 0 0 1 0 38h-14" stroke-width="13"/>
+  </g>
+  <path d="M204 194h96v30c0 27-21 46-48 46s-48-19-48-46z" fill="#ef5a5c"/>
+  <rect x="190" y="280" width="124" height="13" rx="6.5" fill="#ef5a5c"/>
 </svg>

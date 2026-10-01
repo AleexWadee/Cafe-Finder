@@ -2,6 +2,7 @@
 import { CATEGORIES } from "../core/config.js";
 import { state, els, activeCat } from "../core/state.js";
 import { t } from "../core/i18n.js";
+import { savePrefs } from "../core/utils.js";
 import { computePlaces, ensureData, findPlaces } from "../data/results.js";
 import { render } from "./list.js";
 import { clearMarkers, drawRadius } from "./map.js";
@@ -36,6 +37,7 @@ export function wireTabs() {
 
 function setCategory(cat) {
   state.category = cat;
+  savePrefs(state);
   if (state.parsed) state.searchScope = cat; // a tab tapped while searching narrows the search
   syncCategoryUI();
   clearMarkers();

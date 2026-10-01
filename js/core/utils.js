@@ -79,10 +79,15 @@ export function loadScript(src) {
 }
 
 // Small things remembered on this device (last position and last download) so the next visit starts instantly.
-export const STORE = { pos: "spothop.lastPos", area: "spothop.lastArea" };
+export const STORE = { pos: "spothop.lastPos", area: "spothop.lastArea", prefs: "spothop.prefs" };
 
 export function storeGet(key) {
   try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
+}
+
+// The category, distance and sort the visitor picked, kept for the next visit.
+export function savePrefs(state) {
+  storeSet(STORE.prefs, { category: state.category, radius: state.radius, sort: state.sort });
 }
 
 export function storeSet(key, value) {

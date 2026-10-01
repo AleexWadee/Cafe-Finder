@@ -73,6 +73,58 @@ const STOP_WORDS = new Set(("a an the near nearby me around close closest best g
   "mejor mejores buen buena bueno buenos buenas para y o que algo por aqui aca zona cheap barato barata baratos economico").split(" "));
 
 // One lookup table for every phrase (1–3 words).
+// The same ideas in German, French, Italian and Portuguese (written without accents: "geöffnet" → "geoffnet").
+const MORE_WORDS = {
+  cat: {
+    coffee: ["kaffee", "kaffeehaus", "fruhstuck", "petit dejeuner", "caffe", "caffetteria", "colazione", "pequeno almoco", "pastelaria"],
+    pubs: ["kneipe", "kneipen", "bier", "biere", "bieres", "pinte", "birreria", "cerveja", "cervejaria"],
+    bars: ["cocktailbar", "weinbar", "verre", "aperitif", "aperitivo", "enoteca", "vinho", "copos"],
+    restaurants: ["essen", "abendessen", "mittagessen", "manger", "diner", "dejeuner", "ristorante", "ristoranti", "trattoria",
+      "pranzo", "jantar", "almoco"],
+  },
+  cuisine: {
+    italian: ["italienisch", "italien", "italienne"],
+    japanese: ["japanisch", "japonais", "japonaise", "giapponese"],
+    burgers: ["hamburger", "hamburgers", "hamburguer", "hamburgueres"],
+    spanish: ["spanisch", "espagnol", "espagnole", "spagnolo", "spagnola", "espanhol", "espanhola"],
+    canarian: ["kanarisch", "canarien", "canarienne"],
+    chinese: ["chinesisch", "chinois", "chinoise", "cinese", "chines", "chinesa"],
+    asian: ["asiatisch", "asiatique"],
+    thai: ["thailandisch", "thailandais", "thailandese"],
+    korean: ["koreanisch", "coreen", "coreenne"],
+    mexican: ["mexikanisch", "mexicain", "mexicaine", "messicano", "messicana"],
+    indian: ["indisch", "indien", "indienne", "indiano", "indiana"],
+    seafood: ["meeresfruchte", "fisch", "fruits de mer", "poisson", "frutti di mare", "pesce", "peixe"],
+    grill: ["steakhaus", "grillade", "griglia", "grelhados", "churrasco", "churrasqueira"],
+    chicken: ["hahnchen", "huhn", "poulet", "frango"],
+    sandwiches: ["sandwichs", "panini", "panino", "sandes", "sanduiche"],
+    healthy: ["gesund", "sain", "sano", "saudavel"],
+    desserts: ["kuchen", "nachtisch", "gateau", "gateaux", "dolci", "dolce", "torta", "sobremesa", "bolo", "bolos"],
+  },
+  feature: {
+    terrace: ["terrasse", "terrazza", "esplanada", "draussen", "all aperto", "allaperto", "en plein air", "ao ar livre"],
+    takeaway: ["zum mitnehmen", "mitnehmen", "a emporter", "emporter", "da asporto", "asporto", "para levar"],
+    delivery: ["lieferung", "lieferdienst", "livraison", "consegna", "entrega"],
+    vegan: ["vegane", "vegetalien", "vegetalienne"],
+    vegetarian: ["vegetarisch", "vegetarien", "vegetarienne"],
+    glutenFree: ["glutenfrei", "sans gluten", "senza glutine", "sem gluten"],
+    accessible: ["barrierefrei", "rollstuhl", "accessibile", "acessivel"],
+    liveMusic: ["livemusik", "live musik", "musique live", "concert", "musica dal vivo", "musica ao vivo"],
+    sports: ["fussball", "sportbar", "foot", "calcio", "desporto", "futebol"],
+    dogFriendly: ["hund", "hunde", "chien", "chiens", "cane", "cani", "cao", "caes"],
+  },
+  open: ["geoffnet", "offen", "jetzt", "ouvert", "ouverte", "maintenant", "aperto", "aperti", "adesso", "ora", "aberto", "abertos", "agora"],
+  stop: "nahe nah mit und ein eine einen gute guter gutes beste besten wo gibt ich mochte suche " +
+    "pres du des avec et une bon bonne meilleur meilleure ou je cherche veux " +
+    "vicino uno buon buono migliore lo gli dove cerco voglio qui " +
+    "perto com um uma bom boa melhor os as onde quero procuro",
+};
+for (const [cat, words] of Object.entries(MORE_WORDS.cat)) CATEGORY_WORDS[cat].push(...words);
+for (const c of CUISINES) c.words.push(...(MORE_WORDS.cuisine[c.id] || []));
+for (const f of FEATURES) f.words.push(...(MORE_WORDS.feature[f.id] || []));
+OPEN_WORDS.push(...MORE_WORDS.open);
+for (const w of MORE_WORDS.stop.split(" ")) STOP_WORDS.add(w);
+
 const PHRASES = new Map();
 for (const [cat, words] of Object.entries(CATEGORY_WORDS)) for (const w of words) PHRASES.set(w, { type: "cat", cat });
 for (const c of CUISINES) for (const w of c.words) PHRASES.set(w, { type: "cuisine", item: c });

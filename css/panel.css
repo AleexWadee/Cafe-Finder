@@ -34,9 +34,32 @@
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-/* Language switch (EN | ES) */
-.lang-switch { flex: none; align-self: flex-start; }
-.lang-switch button { padding: 6px 10px; font-size: 12px; letter-spacing: .03em; }
+/* Language menu: a small "🌐 EN ▾" button over the browser's own language list */
+.lang-picker {
+  position: relative;
+  flex: none;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  cursor: pointer;
+}
+.lang-picker select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 16px; /* 16px stops iPhones zooming in */
+}
+.lang-caret { font-size: 10px; color: var(--muted); }
+.lang-picker:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .controls {
   display: flex;

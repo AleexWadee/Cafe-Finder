@@ -6,9 +6,10 @@ import { t } from "../core/i18n.js";
 import { distanceMeters } from "../core/utils.js";
 import { categoryOf, positionOf, normalize } from "./places.js";
 import { scorePlace } from "./search.js";
+import { savedElements } from "./favorites.js";
 import { covers, findCachedArea, downloadArea, fetchNominatim, prefetchBackup, reverseGeocode } from "./api.js";
 import { render, renderSkeleton, renderCounts, setStatus, emptyState, setLoading } from "../ui/list.js";
-import { drawRadius } from "../ui/map.js";
+import { drawRadius, selectPlace } from "../ui/map.js";
 
 export async function findPlaces(center = state.map.getCenter()) {
   center = { lat: center.lat, lng: center.lng };
@@ -94,7 +95,11 @@ export function computePlaces() {
   const remote = state.remote?.query === state.query ? state.remote.elements : [];
   const seen = new Set();
   const list = [];
-  for (const [el, nearby] of [...state.elements.map((e) => [e, true]), ...remote.map((e) => [e, false])]) {
+  // The Saved list shows saved places wherever they are; otherwise the downloaded area (+ wider search).
+  const pool = state.showSaved
+    ? savedElements().map((e) => [e, false])
+    : [...state.elements.map((e) => [e, true]), ...remote.map((e) => [e, false])];
+  for (const [el, nearby] of pool) {
     const cat = categoryOf(el.tags || {});
     if (!cat || (scope !== "all" && cat !== scope)) continue;
     const pos = positionOf(el);
@@ -125,13 +130,17 @@ export function ensureData() {
 }
 
 // Rebuilds every place (after the language or opening-hours data changes), replacing the map pins too.
+// The place that was open (if any) stays open.
 export function refreshPlaces() {
   state.normCache.clear();
   if (!state.searchCenter || (!state.places.length && state.loading)) return;
+  const openId = state.selectedId;
+  const popupWasOpen = Boolean(openId && state.markers.get(openId)?.isPopupOpen());
   state.markersLayer.clearLayers();
   state.markers.clear();
   computePlaces();
   render();
+  if (openId && state.places.some((p) => p.id === openId)) selectPlace(openId, { openPopup: popupWasOpen });
 }
 
 // Shows the name of the neighbourhood under the title ("Arenales, Las Palmas").
@@ -147,6 +156,7 @@ export async function updatePlaceName(center, force = false) {
     }
     const area = a.neighbourhood || a.suburb || a.quarter || a.city_district || a.road;
     const city = a.city || a.town || a.village;
+    state.cityName = city || "";
     els.placeName.textContent = `📍 ${[area, city].filter(Boolean).join(", ") || t("ui.aroundYou")}`;
   } catch {
     els.placeName.textContent = `📍 ${t("ui.aroundYou")}`;

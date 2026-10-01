@@ -30,6 +30,8 @@ export default {
     youAreHere: "Estás aquí",
     language: "Idioma",
     lookingFor: "Buscando",
+    saved: "Guardados",
+    savedTitle: "Ver tus sitios guardados",
     mapLibraryError: "No se pudo cargar el mapa. Comprueba tu conexión a internet y recarga la página.",
   },
 
@@ -84,6 +86,7 @@ export default {
     resultsFor: "para «{q}»",
     widerArea: "incluye una zona más amplia",
     searchingWider: "Buscando «{q}» en una zona más amplia…",
+    saved: ({ n }) => `${n} sitio${n === 1 ? "" : "s"} guardado${n === 1 ? "" : "s"}`,
   },
 
   empty: {
@@ -98,6 +101,8 @@ export default {
     tryDifferent: "Prueba con otro nombre o quita los filtros.",
     noneHere: "No hay {many} aquí",
     noneHereText: "Prueba una distancia mayor, o mueve el mapa y pulsa «Buscar en esta zona».",
+    noSaved: "Aún no has guardado ningún sitio",
+    noSavedText: "Pulsa ♡ en un sitio para guardarlo aquí.",
   },
 
   hours: {
@@ -139,6 +144,14 @@ export default {
     contact: "Contacto",
     noContact: "No tiene teléfono ni web publicados",
     directions: "🧭 Cómo llegar",
+    findPhone: "Buscar el teléfono en internet",
+    phoneWord: "teléfono",
+    call: "Llamar",
+    save: "Guardar",
+    saved: "Guardado",
+    share: "Compartir",
+    linkCopied: "Enlace copiado — pégalo donde quieras para compartirlo",
+    shareText: "{name} — encontrado con SpotHop",
   },
 
   route: {

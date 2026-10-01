@@ -7,7 +7,8 @@
   <meta name="description" content="Find coffee places, pubs, bars and restaurants near you on a live map." />
   <meta name="theme-color" content="#1a1714" />
   <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="assets/icons/icon.svg" />
+  <link rel="icon" href="assets/icons/icon-192.png" type="image/png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
   <link rel="manifest" href="manifest.webmanifest" />
 
   <!-- Open connections early so the map, data and fonts arrive sooner -->
@@ -36,7 +37,12 @@
           <h1>SpotHop</h1>
           <p class="location" id="placeName" data-i18n="ui.findingLocation">Finding your location…</p>
         </div>
-        <div class="segmented lang-switch" id="langSwitch" role="radiogroup" data-i18n-aria-label="ui.language"></div>
+        <label class="lang-picker" data-i18n-title="ui.language">
+          <span aria-hidden="true">🌐</span>
+          <span class="lang-current" id="langCurrent" aria-hidden="true">EN</span>
+          <span class="lang-caret" aria-hidden="true">▾</span>
+          <select id="langSelect" data-i18n-aria-label="ui.language"></select>
+        </label>
       </header>
 
       <div class="controls">
@@ -83,6 +89,11 @@
       <div class="list-head">
         <div class="status" id="status" aria-live="polite"></div>
         <span class="spinner hidden" id="spinner" aria-hidden="true"></span>
+        <button type="button" class="saved-btn" id="savedBtn" aria-pressed="false" data-i18n-title="ui.savedTitle">
+          <span class="saved-heart" aria-hidden="true"></span>
+          <span data-i18n="ui.saved">Saved</span>
+          <span class="saved-count" id="savedCount"></span>
+        </button>
       </div>
       <ul class="results" id="results"></ul>
 
@@ -97,6 +108,9 @@
       <div class="live-pill" id="livePill"><span class="dot"></span> <span data-i18n="ui.liveLocation">Live location</span></div>
     </main>
   </div>
+
+  <!-- Short messages ("Link copied") -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <!-- The app (js/main.js loads the other modules; the big opening-hours library loads after the map) -->

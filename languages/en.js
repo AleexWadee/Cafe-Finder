@@ -31,6 +31,8 @@ export default {
     youAreHere: "You are here",
     language: "Language",
     lookingFor: "Looking for",
+    saved: "Saved",
+    savedTitle: "Show your saved places",
     mapLibraryError: "Couldn't load the map library. Check your internet connection and reload.",
   },
 
@@ -72,6 +74,7 @@ export default {
     resultsFor: "for “{q}”",
     widerArea: "including a wider area",
     searchingWider: "Searching a wider area for “{q}”…",
+    saved: ({ n }) => `${n} saved place${n === 1 ? "" : "s"}`,
   },
 
   empty: {
@@ -86,6 +89,8 @@ export default {
     tryDifferent: "Try a different name or clear the filters.",
     noneHere: "No {many} found here",
     noneHereText: "Try a bigger distance, or drag the map and tap “Search this area”.",
+    noSaved: "No saved places yet",
+    noSavedText: "Tap ♡ on a place to keep it here.",
   },
 
   hours: {
@@ -127,6 +132,14 @@ export default {
     contact: "Contact",
     noContact: "No phone or website listed",
     directions: "🧭 Directions",
+    findPhone: "Find the phone number online",
+    phoneWord: "phone",
+    call: "Call",
+    save: "Save",
+    saved: "Saved",
+    share: "Share",
+    linkCopied: "Link copied — paste it anywhere to share",
+    shareText: "{name} — found with SpotHop",
   },
 
   route: {

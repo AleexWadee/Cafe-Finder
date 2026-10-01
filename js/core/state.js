@@ -6,6 +6,7 @@ export const state = {
   radius: 1000,
   sort: "distance",
   openNow: false,
+  showSaved: false,    // showing the saved (♡) places instead of the area
 
   // Smart search
   query: "",
@@ -28,6 +29,8 @@ export const state = {
   namedCenter: null,
   countryCode: "",     // from reverse geocoding, used for public-holiday rules in opening hours
   region: "",
+  cityName: "",        // used when searching a phone number online
+  pendingPlaceId: null, // a shared place to open once it's loaded
 
   // Data
   elements: [],        // raw OSM elements for the current search
@@ -54,7 +57,11 @@ export const els = {
   app: $("#app"),
   logo: $("#logo"),
   placeName: $("#placeName"),
-  langSwitch: $("#langSwitch"),
+  langSelect: $("#langSelect"),
+  langCurrent: $("#langCurrent"),
+  savedBtn: $("#savedBtn"),
+  savedCount: $("#savedCount"),
+  toast: $("#toast"),
   query: $("#query"),
   clearQuery: $("#clearQuery"),
   suggest: $("#suggest"),

@@ -62,7 +62,7 @@ function highlightsOf(tags) {
 
 // Only the tags SpotHop uses are saved on the device, which keeps the saved copy small.
 export const KEEP_TAGS = ["name", "amenity", "shop", "cuisine", "opening_hours", "addr:street", "addr:housenumber", "addr:city",
-  "email", "contact:email", "contact:mobile", "contact:instagram", "contact:facebook", "instagram", "facebook",
+  "email", "contact:email", "contact:mobile", "contact:whatsapp", "contact:instagram", "contact:facebook", "instagram", "facebook",
   "website", "contact:website", "phone", "contact:phone", "outdoor_seating", "internet_access", "takeaway", "delivery",
   "wheelchair", "diet:vegan", "diet:vegetarian", "diet:gluten_free", "cocktails", "drink:cocktail", "real_ale",
   "drink:real_ale", "brewery", "drink:wine", "bar", "live_music", "sport", "reservation", "dog", "brand"];
@@ -98,6 +98,7 @@ export function normalize(el) {
     website: safeUrl(tags.website || tags["contact:website"]),
     phones: splitList(tags.phone || tags["contact:phone"] || tags["contact:mobile"]),
     email: tags.email || tags["contact:email"] || "",
+    whatsapp: (tags["contact:whatsapp"] || "").replace(/[^\d]/g, ""),
     instagram: socialUrl(tags["contact:instagram"] || tags.instagram, "https://www.instagram.com/"),
     facebook: socialUrl(tags["contact:facebook"] || tags.facebook, "https://www.facebook.com/"),
     isOpen,

@@ -8,6 +8,8 @@ import { weekHtml } from "../data/hours.js";
 import { scorePlace } from "../data/search.js";
 import { renderMarkers } from "./map.js";
 import { renderSuggest } from "./searchbox.js";
+import { favButton, shareButton } from "./actions.js";
+import { selectPlace } from "./map.js";
 
 // "Open now" hides closed places. Places with published hours that are open come first,
 // then places that are likely open based on typical hours.
@@ -28,6 +30,12 @@ export function render() {
   renderCounts();
   renderStatus(list);
   renderSuggest();
+  if (state.pendingPlaceId && state.places.some((p) => p.id === state.pendingPlaceId)) {
+    const id = state.pendingPlaceId;
+    state.pendingPlaceId = null;
+    history.replaceState(null, "", location.pathname + location.search); // tidy the address bar
+    setTimeout(() => selectPlace(id, { scrollList: true }), 50);
+  }
 }
 
 export function setLoading(on) {
@@ -42,7 +50,9 @@ export function setStatus(html) {
 function renderStatus(list) {
   const cat = activeCat();
   const note = (text) => ` <span class="note">· ${escapeHtml(text)}</span>`;
-  if (state.source === "quick") {
+  if (state.showSaved) {
+    setStatus(`<b>${escapeHtml(t("status.saved", { n: list.length }))}</b>`);
+  } else if (state.source === "quick") {
     setStatus(`<b>${plural(list.length, cat)}</b>${note(t("status.loadingFull"))}`);
   } else if (!state.places.length) {
     setStatus("");
@@ -62,7 +72,7 @@ function renderStatus(list) {
 // Number badges on the category tiles (matches per tab while searching).
 export function renderCounts() {
   const counts = { coffee: 0, pubs: 0, bars: 0, restaurants: 0, all: 0 };
-  const complete = state.source === "overpass" && state.searchCenter;
+  const complete = state.source === "overpass" && state.searchCenter && !state.showSaved;
   if (complete) {
     const seen = new Set();
     for (const el of state.elements) {
@@ -138,15 +148,28 @@ export function infoHtml(p) {
   if (p.instagram) row("📷", link(p.instagram, "Instagram"), "info.contact");
   if (p.facebook) row("👍", link(p.facebook, "Facebook"), "info.contact");
   if (p.fullCuisine) row("🍽️", escapeHtml(p.fullCuisine), "info.food");
-  if (!p.phones.length && !p.website && !p.email && !p.instagram && !p.facebook) {
-    row("ℹ️", `<span class="muted">${escapeHtml(t("info.noContact"))}</span>`, "info.contact");
-  }
+  if (p.whatsapp) row("💬", link(`https://wa.me/${p.whatsapp}`, "WhatsApp"), "info.contact");
+  // No phone on OpenStreetMap: one tap searches the web for it.
+  if (!p.phones.length) row("📞", link(phoneSearchUrl(p), t("info.findPhone")), "info.phone");
   return `<div class="info">${rows.join("")}</div>${chipsHtml(p.highlights)}`;
 }
 
-// Everything shown when a card is opened: contact details, timetable and directions.
+// A web search for the place's phone number ("Margariita Calle Joaquín Blume Las Palmas phone").
+function phoneSearchUrl(p) {
+  const words = [p.name, p.tags["addr:street"], p.tags["addr:city"] || state.cityName, t("info.phoneWord")];
+  return `https://www.google.com/search?q=${encodeURIComponent(words.filter(Boolean).join(" "))}`;
+}
+
+const telHref = (phone) => `tel:${phone.replace(/[^\d+]/g, "")}`;
+
+function actionsHtml(p) {
+  const call = p.phones.length ? `<a class="btn" href="${escapeHtml(telHref(p.phones[0]))}">📞 ${escapeHtml(t("info.call"))}</a>` : "";
+  return `<div class="actions">${directionsButton(p)}${call}${favButton(p, { withLabel: true })}${shareButton(p)}</div>`;
+}
+
+// Everything shown when a card is opened: contact details, timetable and buttons.
 export function detailsHtml(p) {
-  return `${infoHtml(p)}<div class="week-wrap">${weekHtml(p)}</div><div class="actions">${directionsButton(p)}</div>`;
+  return `${infoHtml(p)}<div class="week-wrap">${weekHtml(p)}</div>${actionsHtml(p)}`;
 }
 
 // The map popup: same details in a compact form.
@@ -161,11 +184,15 @@ export function popupHtml(p) {
       ${hours}
       ${infoHtml(p)}
       <div class="week-wrap">${weekHtml(p)}</div>
-      <div class="actions">${directionsButton(p)}</div>
+      ${actionsHtml(p)}
     </div>`;
 }
 
 function renderEmpty() {
+  if (state.showSaved) {
+    els.results.innerHTML = emptyState("♡", t("empty.noSaved"), t("empty.noSavedText"));
+    return;
+  }
   if (state.parsed) {
     const wideDone = state.remote?.query === state.query;
     const canWiden = !wideDone && (state.parsed.terms.length || state.parsed.cuisines.length);
@@ -182,7 +209,7 @@ function renderEmpty() {
   const many = t(`cat.${cat}.many`);
   els.results.innerHTML = state.places.length
     ? emptyState("🔎", t("empty.noMatches"), state.openNow ? t("empty.allClosed", { many }) : t("empty.tryDifferent"))
-    : emptyState(CATEGORIES[cat].emoji, t("empty.noneHere", { many }), t("empty.noneHereText"));
+    : emptyState(CATEGORIES[cat].emoji, t("empty.noneHere", { many, one: t(`cat.${cat}.one`) }), t("empty.noneHereText"));
 }
 
 function renderList(list) {
@@ -207,6 +234,8 @@ function renderList(list) {
           <div class="card-top">
             <h3 class="name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</h3>
             ${badgeHtml(p)}
+            ${p.phones.length ? `<a class="icon-btn" href="${escapeHtml(telHref(p.phones[0]))}" title="${escapeHtml(t("info.call"))}" aria-label="${escapeHtml(t("info.call"))}">📞</a>` : ""}
+            ${favButton(p)}
           </div>
           ${subtitle ? `<div class="subtitle">${escapeHtml(subtitle)}</div>` : ""}
           <div class="meta">${meta}</div>

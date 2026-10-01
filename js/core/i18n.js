@@ -1,8 +1,12 @@
 // Languages: picks the visitor's language, translates texts with t("section.key"), remembers the choice.
 import en from "../../languages/en.js";
 import es from "../../languages/es.js";
+import de from "../../languages/de.js";
+import fr from "../../languages/fr.js";
+import it from "../../languages/it.js";
+import pt from "../../languages/pt.js";
 
-export const LANGUAGES = { en, es }; // add new languages here (files live in /languages)
+export const LANGUAGES = { en, es, de, fr, it, pt }; // add new languages here (files live in /languages)
 
 const STORAGE_KEY = "spothop.lang";
 let current = detectLanguage();
