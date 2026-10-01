@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SpotHop — Cafes, Pubs, Bars & Restaurants Near You</title>
+  <meta name="description" content="Find coffee places, pubs, bars and restaurants near you on a live map." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app" id="app" data-cat="coffee">
+    <aside class="panel">
+      <header class="brand">
+        <div class="logo" id="logo">☕</div>
+        <div class="brand-text">
+          <h1>SpotHop</h1>
+          <p class="location" id="placeName">Finding your location…</p>
+        </div>
+      </header>
+
+      <div class="controls">
+        <label class="search">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input id="query" type="search" placeholder="Search by name or cuisine…" autocomplete="off" />
+        </label>
+
+        <div class="cats" id="tabs" role="tablist" aria-label="Categories"></div>
+
+        <div class="filter-block">
+          <span class="filter-label">Distance</span>
+          <div class="segmented" id="radius" role="radiogroup" aria-label="Distance">
+            <button type="button" data-value="500">500 m</button>
+            <button type="button" data-value="1000" aria-checked="true">1 km</button>
+            <button type="button" data-value="2000">2 km</button>
+            <button type="button" data-value="5000">5 km</button>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <div class="filter-block">
+            <span class="filter-label">Sort</span>
+            <div class="segmented" id="sort" role="radiogroup" aria-label="Sort">
+              <button type="button" data-value="distance" aria-checked="true">Nearest</button>
+              <button type="button" data-value="name">A–Z</button>
+            </div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="openNow" />
+            <span class="track"><span class="thumb-dot"></span></span>
+            <span>Open now</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="list-head">
+        <div class="status" id="status" aria-live="polite"></div>
+        <span class="spinner hidden" id="spinner" aria-hidden="true"></span>
+      </div>
+      <ul class="results" id="results"></ul>
+
+      <!-- Turn-by-turn directions (shown instead of the list while a route is open) -->
+      <section class="route hidden" id="routeView" aria-live="polite"></section>
+    </aside>
+
+    <main class="map-wrap">
+      <div id="map"></div>
+      <button class="map-btn search-area hidden" id="searchAreaBtn">🔄 Search this area</button>
+      <button class="map-btn locate" id="locateBtn" title="Go to my location" aria-label="Go to my location">◎</button>
+      <div class="live-pill" id="livePill"><span class="dot"></span> Live location</div>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <!-- SunCalc is required by opening_hours (for sunrise/sunset rules) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/opening_hours@3.15.0/build/opening_hours.min.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js" type="module"></script>
+</body>
+</html>
