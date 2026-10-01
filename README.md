@@ -31,43 +31,57 @@ Then open http://localhost:5173 and allow location access.
 ## Project structure
 
 ```
-index.html              Page layout
-manifest.webmanifest    Lets phones add SpotHop to the home screen
-assets/
-  icon.svg              App icon
-css/
-  base.css              Colors, layout, buttons, chips, phone layout
-  panel.css             Header, language switch, search box, category tiles, filters
-  places.css            Place cards, details, timetable, empty states
-  map.css               Map buttons, pins, popups
-  route.css             Directions panel
-js/
-  main.js               Starts the app and connects the buttons
-  config.js             Settings: default location, servers, categories, timings
-  state.js              What the app remembers while running, and page elements
-  i18n.js               Languages: detection, t("key") translations, page texts
-  locales/
-    en.js               English texts
-    es.js               Spanish texts
-  api.js                Overpass and Nominatim servers, caching, saving on the device
-  places.js             Turns OpenStreetMap data into places
-  hours.js              Opening hours, estimates and weekly timetable
-  results.js            Finding places for an area, category and search
-  list.js               The list: status line, cards, details, popups
-  map.js                Map, pins, opening and closing places
-  tabs.js               Category tiles
-  search.js             Smart search: understanding words, typos, ranking
-  searchbox.js          Search box: suggestions, chips, wider search
-  route.js              Directions
-  geo.js                Live location
+SpotHop/
+├── index.html                Page layout (stays here: GitHub Pages opens it from the top folder)
+├── manifest.webmanifest      Lets phones add SpotHop to the home screen
+├── README.md                 This file
+├── package.json              "npm start" runs a local server
+│
+├── assets/
+│   └── icons/icon.svg        App icon
+│
+├── css/                      Styles
+│   ├── base.css              Colors, layout, buttons, chips, phone layout
+│   ├── panel.css             Header, language switch, search box, category tiles, filters
+│   ├── places.css            Place cards, details, timetable, empty states
+│   ├── map.css               Map buttons, pins, popups
+│   └── route.css             Directions panel
+│
+├── languages/                All the texts, one file per language
+│   ├── en.js                 English
+│   └── es.js                 Spanish
+│
+├── js/                       The app
+│   ├── main.js               Starts the app and connects the buttons
+│   ├── core/                 The basics
+│   │   ├── config.js         Settings: default location, servers, categories, timings
+│   │   ├── state.js          What the app remembers while running, and page elements
+│   │   ├── i18n.js           Languages: detection, t("key") translations, page texts
+│   │   ├── utils.js          Small helpers (distances, times, saving on the device)
+│   │   └── geo.js            Live location
+│   ├── data/                 Getting and understanding the data
+│   │   ├── api.js            Overpass and Nominatim servers, caching
+│   │   ├── places.js         Turns OpenStreetMap data into places
+│   │   ├── hours.js          Opening hours, estimates and weekly timetable
+│   │   ├── search.js         Smart search: understanding words, typos, ranking
+│   │   └── results.js        Finding places for an area, category and search
+│   └── ui/                   What you see and click
+│       ├── list.js           The list: status line, cards, details, popups
+│       ├── map.js            Map, pins, opening and closing places
+│       ├── tabs.js           Category tiles
+│       ├── searchbox.js      Search box: suggestions, chips, wider search
+│       └── route.js          Directions
+│
+└── docs/
+    └── CHANGELOG.md          What changed in each version
 ```
 
 ## Adding a language
 
-1. Copy `js/locales/en.js` to a new file, for example `js/locales/fr.js`, and translate the texts.
-2. In `js/i18n.js`, import it and add it to `LANGUAGES`:
+1. Copy `languages/en.js` to a new file, for example `languages/fr.js`, and translate the texts.
+2. In `js/core/i18n.js`, import it and add it to `LANGUAGES`:
    ```js
-   import fr from "./locales/fr.js";
+   import fr from "../../languages/fr.js";
    export const LANGUAGES = { en, es, fr };
    ```
 The new language appears in the switch automatically.
@@ -81,4 +95,4 @@ The new language appears in the switch automatically.
 | Opening hours | [opening_hours.js](https://github.com/opening-hours/opening_hours.js) | No |
 | Directions | [OSRM](https://project-osrm.org) routing servers run by [FOSSGIS](https://routing.openstreetmap.de) | No |
 
-The public servers are free and shared, so they're sometimes busy. SpotHop asks several Overpass servers at once. If they're all busy, it switches to Nominatim, which returns fewer results (up to 40 per category) but is usually available. You can change the servers in `js/config.js`.
+The public servers are free and shared, so they're sometimes busy. SpotHop asks several Overpass servers at once. If they're all busy, it switches to Nominatim, which returns fewer results (up to 40 per category) but is usually available. You can change the servers in `js/core/config.js`.

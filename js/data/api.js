@@ -1,9 +1,9 @@
 // Talking to the free OpenStreetMap services: Overpass (main data), Nominatim (backup search,
 // neighbourhood names) — plus caching and saving data on the device.
-import { CONFIG, CATEGORIES, CACHE_TTL, OVERPASS_TIMEOUT, PREFETCH_RADIUS, PREFETCH_MARGIN } from "./config.js";
-import { state } from "./state.js";
-import { getLang } from "./i18n.js";
-import { distanceMeters, sleep, storeSet, STORE } from "./utils.js";
+import { CONFIG, CATEGORIES, CACHE_TTL, OVERPASS_TIMEOUT, PREFETCH_RADIUS, PREFETCH_MARGIN } from "../core/config.js";
+import { state } from "../core/state.js";
+import { getLang } from "../core/i18n.js";
+import { distanceMeters, sleep, storeSet, STORE } from "../core/utils.js";
 import { positionOf, KEEP_TAGS } from "./places.js";
 
 // ---------- Overpass (main source) ----------

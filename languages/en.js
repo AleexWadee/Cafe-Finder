@@ -1,5 +1,5 @@
 // English texts.
-// To add a language: copy this file (e.g. fr.js), translate the values and register it in js/i18n.js.
+// To add a language: copy this file (e.g. fr.js), translate the values and register it in js/core/i18n.js.
 // Values can be plain text with {placeholders}, or small functions when the wording depends on the values.
 
 const onto = (name) => (name ? ` onto ${name}` : "");

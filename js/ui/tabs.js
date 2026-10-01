@@ -1,8 +1,8 @@
 // The category tiles (Coffee, Pubs, Bars, Restaurants, All).
-import { CATEGORIES } from "./config.js";
-import { state, els, activeCat } from "./state.js";
-import { t } from "./i18n.js";
-import { computePlaces, ensureData, findPlaces } from "./results.js";
+import { CATEGORIES } from "../core/config.js";
+import { state, els, activeCat } from "../core/state.js";
+import { t } from "../core/i18n.js";
+import { computePlaces, ensureData, findPlaces } from "../data/results.js";
 import { render } from "./list.js";
 import { clearMarkers, drawRadius } from "./map.js";
 

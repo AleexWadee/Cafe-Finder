@@ -1,11 +1,11 @@
 // The side list: status line, place cards with their details, empty states and tab counts.
-import { CATEGORIES } from "./config.js";
-import { state, els, activeCat } from "./state.js";
-import { t } from "./i18n.js";
-import { escapeHtml, distanceMeters, formatDistance, walkTime, plural } from "./utils.js";
-import { categoryOf, positionOf, normalize } from "./places.js";
-import { weekHtml } from "./hours.js";
-import { scorePlace } from "./search.js";
+import { CATEGORIES } from "../core/config.js";
+import { state, els, activeCat } from "../core/state.js";
+import { t } from "../core/i18n.js";
+import { escapeHtml, distanceMeters, formatDistance, walkTime, plural } from "../core/utils.js";
+import { categoryOf, positionOf, normalize } from "../data/places.js";
+import { weekHtml } from "../data/hours.js";
+import { scorePlace } from "../data/search.js";
 import { renderMarkers } from "./map.js";
 import { renderSuggest } from "./searchbox.js";
 

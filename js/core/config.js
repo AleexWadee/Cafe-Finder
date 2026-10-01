@@ -14,7 +14,7 @@ export const CONFIG = {
   ROUTING_SERVER: "https://routing.openstreetmap.de",
 };
 
-// Categories shown as tabs. Their names come from the language files (js/locales).
+// Categories shown as tabs. Their names come from the language files (languages/).
 export const CATEGORIES = {
   coffee:      { emoji: "☕", nominatim: "cafe" },
   pubs:        { emoji: "🍺", nominatim: "pub" },

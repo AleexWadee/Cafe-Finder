@@ -1,8 +1,8 @@
 // Turns raw OpenStreetMap data into the "place" objects shown in the list and on the map.
-import { CATEGORIES } from "./config.js";
-import { state } from "./state.js";
-import { t, has } from "./i18n.js";
-import { prettify, safeUrl, splitList, socialUrl } from "./utils.js";
+import { CATEGORIES } from "../core/config.js";
+import { state } from "../core/state.js";
+import { t, has } from "../core/i18n.js";
+import { prettify, safeUrl, splitList, socialUrl } from "../core/utils.js";
 import { openingInfo } from "./hours.js";
 import { indexPlace } from "./search.js";
 

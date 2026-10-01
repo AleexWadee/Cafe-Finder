@@ -1,14 +1,14 @@
 // Finding places: downloads (or reuses) data for an area, falls back to the backup source,
 // and filters it down to the current category, distance and search.
-import { MAX_RESULTS, QUICK_RESULTS_DELAY } from "./config.js";
-import { state, els, activeCat } from "./state.js";
-import { t } from "./i18n.js";
-import { distanceMeters } from "./utils.js";
+import { MAX_RESULTS, QUICK_RESULTS_DELAY } from "../core/config.js";
+import { state, els, activeCat } from "../core/state.js";
+import { t } from "../core/i18n.js";
+import { distanceMeters } from "../core/utils.js";
 import { categoryOf, positionOf, normalize } from "./places.js";
 import { scorePlace } from "./search.js";
 import { covers, findCachedArea, downloadArea, fetchNominatim, prefetchBackup, reverseGeocode } from "./api.js";
-import { render, renderSkeleton, renderCounts, setStatus, emptyState, setLoading } from "./list.js";
-import { drawRadius } from "./map.js";
+import { render, renderSkeleton, renderCounts, setStatus, emptyState, setLoading } from "../ui/list.js";
+import { drawRadius } from "../ui/map.js";
 
 export async function findPlaces(center = state.map.getCenter()) {
   center = { lat: center.lat, lng: center.lng };

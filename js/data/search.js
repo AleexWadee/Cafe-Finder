@@ -1,4 +1,4 @@
-import { t } from "./i18n.js";
+import { t } from "../core/i18n.js";
 
 // SpotHop smart search — understands what people type (English or Spanish):
 //   kinds of place ("cerveza" → pubs), food ("pizza", "sushi"), features ("terraza", "wifi"),

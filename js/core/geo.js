@@ -2,10 +2,10 @@
 import { AUTO_REFRESH_DISTANCE, ROUTE_REFRESH_DISTANCE } from "./config.js";
 import { state, els } from "./state.js";
 import { distanceMeters, storeSet, STORE } from "./utils.js";
-import { findPlaces, computePlaces } from "./results.js";
-import { render } from "./list.js";
-import { updateUserMarker } from "./map.js";
-import { calcRoute } from "./route.js";
+import { findPlaces, computePlaces } from "../data/results.js";
+import { render } from "../ui/list.js";
+import { updateUserMarker } from "../ui/map.js";
+import { calcRoute } from "../ui/route.js";
 
 export function getInitialPosition() {
   return new Promise((resolve) => {

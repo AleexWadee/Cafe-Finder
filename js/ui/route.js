@@ -1,8 +1,8 @@
 // Directions inside SpotHop: walking, cycling and driving routes on the map, with turn-by-turn steps.
-import { CONFIG, ROUTE_MODES } from "./config.js";
-import { state, els } from "./state.js";
-import { t } from "./i18n.js";
-import { escapeHtml, distanceMeters, formatDistance, formatDuration, formatTime, catColor } from "./utils.js";
+import { CONFIG, ROUTE_MODES } from "../core/config.js";
+import { state, els } from "../core/state.js";
+import { t } from "../core/i18n.js";
+import { escapeHtml, distanceMeters, formatDistance, formatDuration, formatTime, catColor } from "../core/utils.js";
 import { badgeHtml } from "./list.js";
 import { highlightPin } from "./map.js";
 

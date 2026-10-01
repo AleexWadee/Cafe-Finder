@@ -1,5 +1,5 @@
 // Textos en español.
-// Para añadir un idioma: copia en.js, traduce los valores y regístralo en js/i18n.js.
+// Para añadir un idioma: copia en.js, traduce los valores y regístralo en js/core/i18n.js.
 
 const hacia = (name) => (name ? ` hacia ${name}` : "");
 const lado = (side) => (side === "left" ? "a la izquierda" : "a la derecha");

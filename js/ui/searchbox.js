@@ -1,13 +1,13 @@
 // The search box: understands what's typed (search.js), shows suggestions and the "Looking for" chips,
 // and can search a wider area when nothing nearby matches.
-import { CATEGORIES } from "./config.js";
-import { state, els } from "./state.js";
-import { t } from "./i18n.js";
-import { escapeHtml, formatDistance } from "./utils.js";
-import { parseQuery, chipsFor } from "./search.js";
-import { categoryOf } from "./places.js";
-import { searchWide } from "./api.js";
-import { computePlaces, ensureData } from "./results.js";
+import { CATEGORIES } from "../core/config.js";
+import { state, els } from "../core/state.js";
+import { t } from "../core/i18n.js";
+import { escapeHtml, formatDistance } from "../core/utils.js";
+import { parseQuery, chipsFor } from "../data/search.js";
+import { categoryOf } from "../data/places.js";
+import { searchWide } from "../data/api.js";
+import { computePlaces, ensureData } from "../data/results.js";
 import { render, renderSkeleton, setStatus, setLoading, visiblePlaces, badgeHtml } from "./list.js";
 import { selectPlace } from "./map.js";
 import { syncCategoryUI } from "./tabs.js";

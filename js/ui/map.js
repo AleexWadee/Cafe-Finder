@@ -1,8 +1,8 @@
 // The map: background tiles, place pins and popups, the search circle and the "you are here" dot.
 // Opening a place (card or pin) keeps the list and the map in sync; opening it again closes both.
-import { state, els, activeCat } from "./state.js";
-import { t } from "./i18n.js";
-import { escapeHtml, catColor } from "./utils.js";
+import { state, els, activeCat } from "../core/state.js";
+import { t } from "../core/i18n.js";
+import { escapeHtml, catColor } from "../core/utils.js";
 import { detailsHtml, popupHtml } from "./list.js";
 
 // Free OpenStreetMap tiles (no key). In dark mode they're darkened with a CSS filter.

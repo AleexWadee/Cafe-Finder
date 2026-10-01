@@ -5,12 +5,12 @@
 ### Languages
 - English and Spanish, switched with **EN | ES** in the header. The device's language is used on the first visit and the choice is remembered.
 - Everything is translated: menus, place details, opening hours and day names, search chips, turn-by-turn directions, and the neighbourhood name.
-- New languages can be added with one file in `js/locales/`.
+- New languages can be added with one file in `languages/`.
 
 ### Tidier project
 - The single `app.js` (about 1,400 lines) is split into 16 modules in `js/`, one per job.
 - `style.css` is split into 5 files in `css/`.
-- Added an app icon (`assets/icon.svg`), a web manifest so phones can add SpotHop to the home screen, and `.editorconfig`.
+- Added an app icon (`assets/icons/icon.svg`), a web manifest so phones can add SpotHop to the home screen, and `.editorconfig`.
 
 ### Earlier in 1.1.0
 - Smart search in English and Spanish, with suggestions, typo tolerance and a wider-area search.

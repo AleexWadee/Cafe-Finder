@@ -1,17 +1,17 @@
 // SpotHop — find cafés, pubs, bars and restaurants near you on a live map.
 // Starts the app and connects the controls. Free data: OpenStreetMap (no API key needed).
-import { CONFIG } from "./config.js";
-import { state, els } from "./state.js";
-import { LANGUAGES, getLang, setLang, t, translatePage } from "./i18n.js";
-import { distanceMeters, storeGet, STORE } from "./utils.js";
-import { loadHoursLibrary } from "./hours.js";
-import { findPlaces, refreshPlaces, updatePlaceName } from "./results.js";
-import { render, renderSkeleton, setStatus, setLoading } from "./list.js";
-import { createMap, togglePlace, highlightPin, updateUserMarker, clearMarkers } from "./map.js";
-import { buildTabs, translateTabs, wireTabs } from "./tabs.js";
-import { wireSearchBox, renderUnderstood } from "./searchbox.js";
-import { wireRoute, renderRouteView } from "./route.js";
-import { getInitialPosition, startWatchingPosition } from "./geo.js";
+import { CONFIG } from "./core/config.js";
+import { state, els } from "./core/state.js";
+import { LANGUAGES, getLang, setLang, t, translatePage } from "./core/i18n.js";
+import { distanceMeters, storeGet, STORE } from "./core/utils.js";
+import { loadHoursLibrary } from "./data/hours.js";
+import { findPlaces, refreshPlaces, updatePlaceName } from "./data/results.js";
+import { render, renderSkeleton, setStatus, setLoading } from "./ui/list.js";
+import { createMap, togglePlace, highlightPin, updateUserMarker, clearMarkers } from "./ui/map.js";
+import { buildTabs, translateTabs, wireTabs } from "./ui/tabs.js";
+import { wireSearchBox, renderUnderstood } from "./ui/searchbox.js";
+import { wireRoute, renderRouteView } from "./ui/route.js";
+import { getInitialPosition, startWatchingPosition } from "./core/geo.js";
 
 // ---------- Language ----------
 

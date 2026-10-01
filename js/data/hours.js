@@ -1,8 +1,8 @@
 // Opening hours: open/closed right now, the next change, the weekly timetable, and estimates
 // for places that haven't published their hours.
-import { state } from "./state.js";
-import { t } from "./i18n.js";
-import { escapeHtml, formatTime, weekday, loadScript } from "./utils.js";
+import { state } from "../core/state.js";
+import { t } from "../core/i18n.js";
+import { escapeHtml, formatTime, weekday, loadScript } from "../core/utils.js";
 
 // Many places haven't published their hours on OpenStreetMap. For those, SpotHop estimates from
 // the usual hours for that kind of place (written in OSM opening_hours format) and labels them "Likely".
