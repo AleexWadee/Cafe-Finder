@@ -108,3 +108,7 @@ The new language appears in the 🌐 menu automatically. To make the search unde
 | Directions | [OSRM](https://project-osrm.org) routing servers run by [FOSSGIS](https://routing.openstreetmap.de) | No |
 
 The public servers are free and shared, so they're sometimes busy. SpotHop asks several Overpass servers at once. If they're all busy, it switches to Nominatim, which returns fewer results (up to 40 per category) but is usually available. You can change the servers in `js/core/config.js`.
+
+## License
+
+© 2026 Alejandro ([AleexWadee](https://github.com/AleexWadee)). All rights reserved. The code is public to read, but it may not be copied, hosted or reused without permission. See [LICENSE](LICENSE).
